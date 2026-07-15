@@ -1,5 +1,5 @@
 # robots.txt — Parish of the Dormition of the Mother of God
-# Replace YOUR-DOMAIN.example with your real domain before publishing.
+# Replace orthodox.sg with your real domain before publishing.
 
 User-agent: *
 Allow: /
@@ -27,4 +27,4 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://YOUR-DOMAIN.example/sitemap.xml
+Sitemap: https://orthodox.sg/sitemap.xml

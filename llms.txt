@@ -6,7 +6,7 @@
 > All are welcome.
 
 This file summarises the site for language models and AI search engines. Replace
-YOUR-DOMAIN.example with the real domain before publishing.
+orthodox.sg with the real domain before publishing.
 
 ## About the parish
 - Full name: Parish of the Dormition of the Mother of God (Приход Успения Пресвятой Богородицы)
@@ -39,7 +39,7 @@ YOUR-DOMAIN.example with the real domain before publishing.
 English, Russian, Chinese, Malay, Tamil, Indonesian, Vietnamese, Thai, Korean, Japanese, Filipino.
 
 ## Key links
-- Website: https://YOUR-DOMAIN.example/
+- Website: https://orthodox.sg/
 - Facebook group: https://www.facebook.com/groups/453874144142182/
 - Questions (WhatsApp): https://wa.me/6564622448
 
