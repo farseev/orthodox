@@ -1,0 +1,30 @@
+# robots.txt — Parish of the Dormition of the Mother of God
+# Replace YOUR-DOMAIN.example with your real domain before publishing.
+
+User-agent: *
+Allow: /
+
+# AI / LLM crawlers welcome (Generative Engine Optimization).
+# Remove any block below if you would rather a given assistant NOT use the site.
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: Bingbot
+Allow: /
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://YOUR-DOMAIN.example/sitemap.xml
