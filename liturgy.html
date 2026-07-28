@@ -81,6 +81,19 @@ body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);
 .day .dt{font:500 .92rem/1.35 var(--sans);color:var(--ink)}
 .day .dt b{color:var(--gold-text)}
 .day .dt .os{color:var(--ink-2);font-weight:400}
+.datepick{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.datepick label{font:600 .68rem/1.3 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.datepick input[type=date]{font:500 .9rem/1 var(--sans);color:var(--ink);background:var(--raised);border:1px solid var(--hairline);border-radius:4px;padding:8px 10px}
+.datepick input[type=date]:focus{outline:none;border-color:var(--gold)}
+.datepick button{font:500 .8rem/1 var(--sans);color:var(--gold-text);background:var(--raised);border:1px solid var(--hairline);border-radius:4px;padding:8px 12px;cursor:pointer}
+.datepick button:hover{border-color:var(--gold)}
+.day .dt .tone{color:var(--gold-text)}
+.day .hint{flex-basis:100%;max-width:82ch;font:400 .8rem/1.5 var(--sans);color:var(--ink-soft);margin:2px 0 0}
+.day .hint b{color:var(--gold-text);font-weight:500}
+.trow.hot{background:var(--lit-wash);border-color:var(--gold)}
+.trow.hot .tag{color:var(--gold-text)}
+body.dayfilter .trow.byday:not(.hot){opacity:.42}
+body[data-glas] .trow.byglas:not(.hot){opacity:.42}
 
 
 
@@ -211,7 +224,13 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
 
 <section class="day">
   <div class="row">
+    <div class="datepick">
+      <label for="litDate" data-t="dateLabel">Date</label>
+      <input type="date" id="litDate">
+      <button type="button" id="litToday" data-t="todayBtn">Today</button>
+    </div>
     <div class="dt" id="dateLine"></div>
+    <p class="hint" id="dayHint" data-t="dayHint"></p>
   </div>
 </section>
 
@@ -455,16 +474,53 @@ function julianPascha(y){ const a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+3
   const m=Math.floor((d+e+114)/31), day=((d+e+114)%31)+1; return new Date(Date.UTC(y,m-1,day)); }
 function addDays(dt,n){ const x=new Date(dt); x.setUTCDate(x.getUTCDate()+n); return x; }
 function gregPascha(y){ return addDays(julianPascha(y),13); } // 1900-2099
+function currentDate(){
+  const el=document.getElementById("litDate"), v=el&&el.value;
+  if(v){ const p=v.split("-").map(Number); return new Date(Date.UTC(p[0],p[1]-1,p[2])); }
+  const n=new Date(); return new Date(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()));
+}
+/* resurrectional tone (glas) for ordinary time; seasonal during Lent & the Paschal season */
+function toneForDate(d){
+  const y=d.getUTCFullYear(); let anchor=null, aY=null;
+  [y-1,y,y+1].forEach(yy=>{ const as=addDays(gregPascha(yy),56); if(as.getTime()<=d.getTime() && (!anchor||as>anchor)){anchor=as; aY=yy;} });
+  if(!anchor) return {tone:0, seasonal:true};
+  const nextTriodion=addDays(gregPascha(aY+1),-70);
+  if(d.getTime()>=nextTriodion.getTime()) return {tone:0, seasonal:true};
+  const weeks=Math.floor((d.getTime()-anchor.getTime())/(7*86400000));
+  const n=((weeks%8)+8)%8; return {tone:(n===0)?8:n, seasonal:false};
+}
+function applyDayHighlight(dow, t){
+  const map={0:"sun",1:"mon",2:"tue",3:"wed",4:"thu",5:"fri",6:"sat"}, dayKey=map[dow];
+  document.body.classList.add("dayfilter");
+  document.querySelectorAll(".trow.byday").forEach(r=>r.classList.toggle("hot", r.dataset.day===dayKey));
+  if(dow===0 && !t.seasonal && t.tone>0){
+    document.body.setAttribute("data-glas", t.tone);
+    document.querySelectorAll(".trow.byglas").forEach(r=>r.classList.toggle("hot", r.dataset.glas===String(t.tone)));
+  } else {
+    document.body.removeAttribute("data-glas");
+    document.querySelectorAll(".trow.byglas").forEach(r=>r.classList.remove("hot"));
+  }
+}
 function computeDay(){
-  const now=new Date();
-  const today=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));
-  const os=addDays(today,-13); // Old-Style date = New Style - 13 days (1900-2099)
+  const today=currentDate(), dow=today.getUTCDay(), os=addDays(today,-13);
   const loc={en:"en-GB",zh:"zh-CN",ms:"ms-MY",ta:"ta-IN",id:"id-ID",vi:"vi-VN",th:"th-TH",ko:"ko-KR",ja:"ja-JP",tl:"fil-PH"}[L()]||"en-GB";
+  const U=UI[L()]||UI.en;
   const nsStr=today.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
   const osStr=os.toLocaleDateString(loc,{day:"numeric",month:"long",timeZone:"UTC"});
   const osLabel={en:"O.S.",zh:"儒略历",ms:"K.L.",ta:"ப.மு.",id:"K.L.",vi:"CL",th:"จ.",ko:"구력",ja:"旧",tl:"L.L."}[L()]||"O.S.";
-  document.getElementById("dateLine").innerHTML="<b>"+esc(nsStr)+"</b> &nbsp;·&nbsp; <span class='os'>"+esc(osStr)+" ("+esc(osLabel)+")</span>";
+  const t=toneForDate(today); let toneStr="";
+  if(dow===0){
+    toneStr = t.seasonal ? (" &nbsp;·&nbsp; <span class='os'>"+esc(U.seasonalNote||"(seasonal)")+"</span>")
+                         : (" &nbsp;·&nbsp; <b class='tone'>"+esc((U.glas||"Tone")+" "+t.tone)+"</b>");
+  }
+  document.getElementById("dateLine").innerHTML="<b>"+esc(nsStr)+"</b> &nbsp;·&nbsp; <span class='os'>"+esc(osStr)+" ("+esc(osLabel)+")</span>"+toneStr;
+  applyDayHighlight(dow, t);
 }
+(function(){ const di=document.getElementById("litDate"), tb=document.getElementById("litToday");
+  const iso=()=>{ const n=new Date(); return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0"); };
+  if(di){ di.value=iso(); di.addEventListener("change", computeDay); }
+  if(tb) tb.addEventListener("click", ()=>{ if(di) di.value=iso(); computeDay(); });
+})();
 
 /* ---- back to top ---- */
 const toTop=document.getElementById("toTop");
@@ -472,6 +528,8 @@ window.addEventListener("scroll",()=>toTop.classList.toggle("show", window.scrol
 toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 
 /* ---- init ---- */
+const DATEUI={"en": {"dateLabel": "Date", "todayBtn": "Today", "seasonalNote": "(seasonal)", "dayHint": "The prayers of the Liturgy are the same every day — only the tone of the week (on Sundays) and the day's readings change. Pick a date to mark its tone and its prokeimenon and communion verse below. The day's troparia and the Epistle and Gospel readings are taken from the parish calendar."}, "zh": {"dateLabel": "日期", "todayBtn": "今天", "seasonalNote": "（应季）", "dayHint": "礼仪的祷文每天相同——只有本周的调（主日）和当日的经课会变。选择日期即可在下方标出其调，以及进堂咏与领圣体咏。当日的赞词以及使徒书和福音书的经课取自堂区日历。"}, "ms": {"dateLabel": "Tarikh", "todayBtn": "Hari ini", "seasonalNote": "(bermusim)", "dayHint": "Doa-doa Liturgi sama setiap hari — hanya nada minggu (pada hari Ahad) dan bacaan hari itu yang berubah. Pilih tarikh untuk menandakan nadanya serta prokeimenon dan ayat komuninya di bawah. Troparion hari itu serta bacaan Surat dan Injil diambil daripada kalendar paroki."}, "ta": {"dateLabel": "தேதி", "todayBtn": "இன்று", "seasonalNote": "(பருவம்)", "dayHint": "பூஜையின் ஜெபங்கள் தினமும் ஒரே மாதிரி — வாரத்தின் தொனி (ஞாயிறு) மற்றும் அன்றைய வாசகங்களே மாறும். ஒரு தேதியைத் தேர்ந்தெடுத்தால் அதன் தொனியும், புரோக்கிமெனனும், திருவிருந்து வசனமும் கீழே குறிக்கப்படும். அன்றைய திருப்பாடல்களும் நிருபம்/நற்செய்தி வாசகங்களும் பங்கு நாட்காட்டியிலிருந்து எடுக்கப்படுகின்றன."}, "id": {"dateLabel": "Tanggal", "todayBtn": "Hari ini", "seasonalNote": "(musiman)", "dayHint": "Doa-doa Liturgi sama setiap hari — hanya nada pekan (pada hari Minggu) dan bacaan hari itu yang berubah. Pilih tanggal untuk menandai nada serta prokimen dan ayat komuninya di bawah. Troparion hari itu serta bacaan Surat dan Injil diambil dari kalender paroki."}, "vi": {"dateLabel": "Ngày", "todayBtn": "Hôm nay", "seasonalNote": "(theo mùa)", "dayHint": "Các lời nguyện của Phụng vụ giống nhau mỗi ngày — chỉ có cung của tuần (vào Chủ nhật) và các bài đọc trong ngày là thay đổi. Chọn một ngày để đánh dấu cung cùng prokimenon và câu hiệp lễ của ngày đó bên dưới. Troparion trong ngày và các bài đọc Thư và Tin Mừng lấy từ lịch giáo xứ."}, "th": {"dateLabel": "วันที่", "todayBtn": "วันนี้", "seasonalNote": "(ตามฤดู)", "dayHint": "บทภาวนาของพิธีบูชาเหมือนกันทุกวัน — มีเพียงทำนองประจำสัปดาห์ (วันอาทิตย์) และบทอ่านประจำวันที่เปลี่ยน เลือกวันที่เพื่อทำเครื่องหมายทำนอง พร้อมบทโปรคีเมนอนและบทรับศีลของวันนั้นด้านล่าง บททรอปาริออนประจำวันและบทอ่านจดหมายกับพระวรสารนำมาจากปฏิทินของวัด"}, "ko": {"dateLabel": "날짜", "todayBtn": "오늘", "seasonalNote": "(절기)", "dayHint": "성찬예배의 기도문은 매일 같습니다 — 그 주의 조(주일)와 그날의 낭독만 바뀝니다. 날짜를 고르면 아래에서 그 조와 프로키메논·성찬 구절이 표시됩니다. 그날의 트로파리온과 서신·복음 낭독은 본당 달력에서 취합니다."}, "ja": {"dateLabel": "日付", "todayBtn": "今日", "seasonalNote": "（季節による）", "dayHint": "聖体礼儀の祈りは毎日同じです — 変わるのはその週の調（主日）とその日の朗読だけです。日付を選ぶと、その調と、その日のプロキメンおよび聖体讃詞が下に示されます。その日の讃詞、および使徒経・福音経の朗読は教区の暦によります。"}, "tl": {"dateLabel": "Petsa", "todayBtn": "Ngayon", "seasonalNote": "(pana-panahon)", "dayHint": "Ang mga panalangin ng Liturhiya ay pareho araw-araw — ang tono ng linggo (tuwing Linggo) at ang mga pagbasa sa araw na iyon lamang ang nagbabago. Pumili ng petsa upang markahan ang tono nito at ang prokeimenon at bersong pangkomunyon sa ibaba. Ang troparion ng araw at ang mga pagbasa sa Sulat at Ebanghelyo ay kinukuha mula sa kalendaryo ng parokya."}};
+for(const l in DATEUI){ if(UI[l]) Object.assign(UI[l], DATEUI[l]); }
 (function(){
   const saved=localStorage.getItem("lit_lang"); if(saved&&UI[saved]) langSel.value=saved;
   applyUI(); render();
