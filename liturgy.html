@@ -92,8 +92,11 @@ body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);
 .day .hint b{color:var(--gold-text);font-weight:500}
 .trow.hot{background:var(--lit-wash);border-color:var(--gold)}
 .trow.hot .tag{color:var(--gold-text)}
-body.dayfilter .trow.byday:not(.hot){opacity:.42}
-body[data-glas] .trow.byglas:not(.hot){opacity:.42}
+body.dayfilter .trow.byday:not(.hot){display:none}
+body.dayfilter[data-glas] .trow.byglas:not(.hot){display:none}
+body.dayfilter:not(.is-sun) .tbl-tone{display:none}
+body.dayfilter.is-sun .tbl-day:not(.tbl-daysun){display:none}
+body.dayfilter.is-sun .rub-dayprok{display:none}
 
 
 
@@ -194,6 +197,7 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
     <div class="tools">
       <select class="langpick" id="lang" aria-label="Translation language">
         <option value="en">English</option>
+        <option value="ru">Русский</option>
         <option value="zh">中文</option>
         <option value="ms">Bahasa Melayu</option>
         <option value="ta">தமிழ்</option>
@@ -344,6 +348,7 @@ function render(){
       if(line.r==="ru"){ // rubric
         const r=document.createElement("div"); r.className="ln";
         const rr=document.createElement("div"); rr.className="rub"; rr.textContent=(line[l]||line.en||line.cs||""); 
+        if(line._grp) r.classList.add("rub-"+line._grp);
         r.appendChild(rr); el.appendChild(r); return;
       }
       if(line.r==="slot"){
@@ -375,6 +380,10 @@ function buildTable(line){
   // line.rows: [{tag, glas?, day?, cs, en}]
   const wrap=document.createElement("div"); wrap.className="ln"; 
   const t=document.createElement("div"); t.className="vtbl";
+  const rows0=line.rows||[];
+  if(rows0.some(r=>r.glas)) wrap.classList.add("tbl-tone");
+  if(rows0.some(r=>r.day)) wrap.classList.add("tbl-day");
+  if(rows0.some(r=>r.day==="sun")) wrap.classList.add("tbl-daysun");
   (line.rows||[]).forEach(row=>{
     const r=document.createElement("div"); r.className="trow"+(row.glas?" byglas":"")+(row.day?" byday":"");
     if(row.glas) r.dataset.glas=row.glas; if(row.day) r.dataset.day=row.day;
@@ -413,9 +422,12 @@ document.getElementById("modeBtn").addEventListener("click",()=>{
 /* ---- language ---- */
 langSel.addEventListener("change",()=>{ applyUI(); render(); localStorage.setItem("lit_lang",langSel.value); });
 function applyUI(){
-  const u=UI[L()];
+  const u=UI[L()]||UI.en;
   document.querySelectorAll("[data-t]").forEach(el=>{ const k=el.getAttribute("data-t"); if(u[k]!=null) el.textContent=u[k]; });
   const q=document.getElementById("q"); if(u.ph) q.placeholder=u.ph;
+  const isRu=L()==="ru", mb=document.getElementById("modeBtn");
+  if(isRu){ document.body.classList.add("mode-cs"); document.body.classList.remove("mode-tr"); mode=1; if(mb) mb.style.display="none"; }
+  else if(mb && mb.style.display==="none"){ document.body.classList.remove("mode-cs","mode-tr"); mode=0; mb.style.display=""; }
   computeDay();
 }
 
@@ -492,6 +504,7 @@ function toneForDate(d){
 function applyDayHighlight(dow, t){
   const map={0:"sun",1:"mon",2:"tue",3:"wed",4:"thu",5:"fri",6:"sat"}, dayKey=map[dow];
   document.body.classList.add("dayfilter");
+  document.body.classList.toggle("is-sun", dow===0);
   document.querySelectorAll(".trow.byday").forEach(r=>r.classList.toggle("hot", r.dataset.day===dayKey));
   if(dow===0 && !t.seasonal && t.tone>0){
     document.body.setAttribute("data-glas", t.tone);
@@ -503,11 +516,11 @@ function applyDayHighlight(dow, t){
 }
 function computeDay(){
   const today=currentDate(), dow=today.getUTCDay(), os=addDays(today,-13);
-  const loc={en:"en-GB",zh:"zh-CN",ms:"ms-MY",ta:"ta-IN",id:"id-ID",vi:"vi-VN",th:"th-TH",ko:"ko-KR",ja:"ja-JP",tl:"fil-PH"}[L()]||"en-GB";
+  const loc={en:"en-GB",ru:"ru-RU",zh:"zh-CN",ms:"ms-MY",ta:"ta-IN",id:"id-ID",vi:"vi-VN",th:"th-TH",ko:"ko-KR",ja:"ja-JP",tl:"fil-PH"}[L()]||"en-GB";
   const U=UI[L()]||UI.en;
   const nsStr=today.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
   const osStr=os.toLocaleDateString(loc,{day:"numeric",month:"long",timeZone:"UTC"});
-  const osLabel={en:"O.S.",zh:"儒略历",ms:"K.L.",ta:"ப.மு.",id:"K.L.",vi:"CL",th:"จ.",ko:"구력",ja:"旧",tl:"L.L."}[L()]||"O.S.";
+  const osLabel={en:"O.S.",ru:"ст. ст.",zh:"儒略历",ms:"K.L.",ta:"ப.மு.",id:"K.L.",vi:"CL",th:"จ.",ko:"구력",ja:"旧",tl:"L.L."}[L()]||"O.S.";
   const t=toneForDate(today); let toneStr="";
   if(dow===0){
     toneStr = t.seasonal ? (" &nbsp;·&nbsp; <span class='os'>"+esc(U.seasonalNote||"(seasonal)")+"</span>")
@@ -528,7 +541,7 @@ window.addEventListener("scroll",()=>toTop.classList.toggle("show", window.scrol
 toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 
 /* ---- init ---- */
-const DATEUI={"en": {"dateLabel": "Date", "todayBtn": "Today", "seasonalNote": "(seasonal)", "dayHint": "The prayers of the Liturgy are the same every day — only the tone of the week (on Sundays) and the day's readings change. Pick a date to mark its tone and its prokeimenon and communion verse below. The day's troparia and the Epistle and Gospel readings are taken from the parish calendar."}, "zh": {"dateLabel": "日期", "todayBtn": "今天", "seasonalNote": "（应季）", "dayHint": "礼仪的祷文每天相同——只有本周的调（主日）和当日的经课会变。选择日期即可在下方标出其调，以及进堂咏与领圣体咏。当日的赞词以及使徒书和福音书的经课取自堂区日历。"}, "ms": {"dateLabel": "Tarikh", "todayBtn": "Hari ini", "seasonalNote": "(bermusim)", "dayHint": "Doa-doa Liturgi sama setiap hari — hanya nada minggu (pada hari Ahad) dan bacaan hari itu yang berubah. Pilih tarikh untuk menandakan nadanya serta prokeimenon dan ayat komuninya di bawah. Troparion hari itu serta bacaan Surat dan Injil diambil daripada kalendar paroki."}, "ta": {"dateLabel": "தேதி", "todayBtn": "இன்று", "seasonalNote": "(பருவம்)", "dayHint": "பூஜையின் ஜெபங்கள் தினமும் ஒரே மாதிரி — வாரத்தின் தொனி (ஞாயிறு) மற்றும் அன்றைய வாசகங்களே மாறும். ஒரு தேதியைத் தேர்ந்தெடுத்தால் அதன் தொனியும், புரோக்கிமெனனும், திருவிருந்து வசனமும் கீழே குறிக்கப்படும். அன்றைய திருப்பாடல்களும் நிருபம்/நற்செய்தி வாசகங்களும் பங்கு நாட்காட்டியிலிருந்து எடுக்கப்படுகின்றன."}, "id": {"dateLabel": "Tanggal", "todayBtn": "Hari ini", "seasonalNote": "(musiman)", "dayHint": "Doa-doa Liturgi sama setiap hari — hanya nada pekan (pada hari Minggu) dan bacaan hari itu yang berubah. Pilih tanggal untuk menandai nada serta prokimen dan ayat komuninya di bawah. Troparion hari itu serta bacaan Surat dan Injil diambil dari kalender paroki."}, "vi": {"dateLabel": "Ngày", "todayBtn": "Hôm nay", "seasonalNote": "(theo mùa)", "dayHint": "Các lời nguyện của Phụng vụ giống nhau mỗi ngày — chỉ có cung của tuần (vào Chủ nhật) và các bài đọc trong ngày là thay đổi. Chọn một ngày để đánh dấu cung cùng prokimenon và câu hiệp lễ của ngày đó bên dưới. Troparion trong ngày và các bài đọc Thư và Tin Mừng lấy từ lịch giáo xứ."}, "th": {"dateLabel": "วันที่", "todayBtn": "วันนี้", "seasonalNote": "(ตามฤดู)", "dayHint": "บทภาวนาของพิธีบูชาเหมือนกันทุกวัน — มีเพียงทำนองประจำสัปดาห์ (วันอาทิตย์) และบทอ่านประจำวันที่เปลี่ยน เลือกวันที่เพื่อทำเครื่องหมายทำนอง พร้อมบทโปรคีเมนอนและบทรับศีลของวันนั้นด้านล่าง บททรอปาริออนประจำวันและบทอ่านจดหมายกับพระวรสารนำมาจากปฏิทินของวัด"}, "ko": {"dateLabel": "날짜", "todayBtn": "오늘", "seasonalNote": "(절기)", "dayHint": "성찬예배의 기도문은 매일 같습니다 — 그 주의 조(주일)와 그날의 낭독만 바뀝니다. 날짜를 고르면 아래에서 그 조와 프로키메논·성찬 구절이 표시됩니다. 그날의 트로파리온과 서신·복음 낭독은 본당 달력에서 취합니다."}, "ja": {"dateLabel": "日付", "todayBtn": "今日", "seasonalNote": "（季節による）", "dayHint": "聖体礼儀の祈りは毎日同じです — 変わるのはその週の調（主日）とその日の朗読だけです。日付を選ぶと、その調と、その日のプロキメンおよび聖体讃詞が下に示されます。その日の讃詞、および使徒経・福音経の朗読は教区の暦によります。"}, "tl": {"dateLabel": "Petsa", "todayBtn": "Ngayon", "seasonalNote": "(pana-panahon)", "dayHint": "Ang mga panalangin ng Liturhiya ay pareho araw-araw — ang tono ng linggo (tuwing Linggo) at ang mga pagbasa sa araw na iyon lamang ang nagbabago. Pumili ng petsa upang markahan ang tono nito at ang prokeimenon at bersong pangkomunyon sa ibaba. Ang troparion ng araw at ang mga pagbasa sa Sulat at Ebanghelyo ay kinukuha mula sa kalendaryo ng parokya."}};
+const DATEUI={"ru": {"dateLabel": "Дата", "todayBtn": "Сегодня", "seasonalNote": "(по сезону)", "dayHint": "Молитвы литургии одни и те же каждый день — меняются лишь глас недели (по воскресеньям) и чтения дня. Выберите дату, чтобы отметить её глас, прокимен и причастен ниже. Тропари дня, а также чтения Апостола и Евангелия берутся из приходского календаря."}, "en": {"dateLabel": "Date", "todayBtn": "Today", "seasonalNote": "(seasonal)", "dayHint": "The prayers of the Liturgy are the same every day — only the tone of the week (on Sundays) and the day's readings change. Pick a date to mark its tone and its prokeimenon and communion verse below. The day's troparia and the Epistle and Gospel readings are taken from the parish calendar."}, "zh": {"dateLabel": "日期", "todayBtn": "今天", "seasonalNote": "（应季）", "dayHint": "礼仪的祷文每天相同——只有本周的调（主日）和当日的经课会变。选择日期即可在下方标出其调，以及进堂咏与领圣体咏。当日的赞词以及使徒书和福音书的经课取自堂区日历。"}, "ms": {"dateLabel": "Tarikh", "todayBtn": "Hari ini", "seasonalNote": "(bermusim)", "dayHint": "Doa-doa Liturgi sama setiap hari — hanya nada minggu (pada hari Ahad) dan bacaan hari itu yang berubah. Pilih tarikh untuk menandakan nadanya serta prokeimenon dan ayat komuninya di bawah. Troparion hari itu serta bacaan Surat dan Injil diambil daripada kalendar paroki."}, "ta": {"dateLabel": "தேதி", "todayBtn": "இன்று", "seasonalNote": "(பருவம்)", "dayHint": "பூஜையின் ஜெபங்கள் தினமும் ஒரே மாதிரி — வாரத்தின் தொனி (ஞாயிறு) மற்றும் அன்றைய வாசகங்களே மாறும். ஒரு தேதியைத் தேர்ந்தெடுத்தால் அதன் தொனியும், புரோக்கிமெனனும், திருவிருந்து வசனமும் கீழே குறிக்கப்படும். அன்றைய திருப்பாடல்களும் நிருபம்/நற்செய்தி வாசகங்களும் பங்கு நாட்காட்டியிலிருந்து எடுக்கப்படுகின்றன."}, "id": {"dateLabel": "Tanggal", "todayBtn": "Hari ini", "seasonalNote": "(musiman)", "dayHint": "Doa-doa Liturgi sama setiap hari — hanya nada pekan (pada hari Minggu) dan bacaan hari itu yang berubah. Pilih tanggal untuk menandai nada serta prokimen dan ayat komuninya di bawah. Troparion hari itu serta bacaan Surat dan Injil diambil dari kalender paroki."}, "vi": {"dateLabel": "Ngày", "todayBtn": "Hôm nay", "seasonalNote": "(theo mùa)", "dayHint": "Các lời nguyện của Phụng vụ giống nhau mỗi ngày — chỉ có cung của tuần (vào Chủ nhật) và các bài đọc trong ngày là thay đổi. Chọn một ngày để đánh dấu cung cùng prokimenon và câu hiệp lễ của ngày đó bên dưới. Troparion trong ngày và các bài đọc Thư và Tin Mừng lấy từ lịch giáo xứ."}, "th": {"dateLabel": "วันที่", "todayBtn": "วันนี้", "seasonalNote": "(ตามฤดู)", "dayHint": "บทภาวนาของพิธีบูชาเหมือนกันทุกวัน — มีเพียงทำนองประจำสัปดาห์ (วันอาทิตย์) และบทอ่านประจำวันที่เปลี่ยน เลือกวันที่เพื่อทำเครื่องหมายทำนอง พร้อมบทโปรคีเมนอนและบทรับศีลของวันนั้นด้านล่าง บททรอปาริออนประจำวันและบทอ่านจดหมายกับพระวรสารนำมาจากปฏิทินของวัด"}, "ko": {"dateLabel": "날짜", "todayBtn": "오늘", "seasonalNote": "(절기)", "dayHint": "성찬예배의 기도문은 매일 같습니다 — 그 주의 조(주일)와 그날의 낭독만 바뀝니다. 날짜를 고르면 아래에서 그 조와 프로키메논·성찬 구절이 표시됩니다. 그날의 트로파리온과 서신·복음 낭독은 본당 달력에서 취합니다."}, "ja": {"dateLabel": "日付", "todayBtn": "今日", "seasonalNote": "（季節による）", "dayHint": "聖体礼儀の祈りは毎日同じです — 変わるのはその週の調（主日）とその日の朗読だけです。日付を選ぶと、その調と、その日のプロキメンおよび聖体讃詞が下に示されます。その日の讃詞、および使徒経・福音経の朗読は教区の暦によります。"}, "tl": {"dateLabel": "Petsa", "todayBtn": "Ngayon", "seasonalNote": "(pana-panahon)", "dayHint": "Ang mga panalangin ng Liturhiya ay pareho araw-araw — ang tono ng linggo (tuwing Linggo) at ang mga pagbasa sa araw na iyon lamang ang nagbabago. Pumili ng petsa upang markahan ang tono nito at ang prokeimenon at bersong pangkomunyon sa ibaba. Ang troparion ng araw at ang mga pagbasa sa Sulat at Ebanghelyo ay kinukuha mula sa kalendaryo ng parokya."}};
 for(const l in DATEUI){ if(UI[l]) Object.assign(UI[l], DATEUI[l]); }
 (function(){
   const saved=localStorage.getItem("lit_lang"); if(saved&&UI[saved]) langSel.value=saved;
