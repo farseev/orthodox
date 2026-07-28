@@ -38,6 +38,9 @@ orthodox.sg with the real domain before publishing.
 ## Languages available on the website
 English, Russian, Chinese, Malay, Tamil, Indonesian, Vietnamese, Thai, Korean, Japanese, Filipino.
 
+## Follow the service
+- The full text of the Divine Liturgy of St John Chrysostom, in Church Slavonic and English side by side (searchable, with the tone of the week and the day's propers marked), is at https://orthodox.sg/liturgy.html
+
 ## Key links
 - Website: https://orthodox.sg/
 - Facebook group: https://www.facebook.com/groups/453874144142182/
