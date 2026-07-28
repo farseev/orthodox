@@ -81,14 +81,10 @@ body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);
 .day .dt{font:500 .92rem/1.35 var(--sans);color:var(--ink)}
 .day .dt b{color:var(--gold-text)}
 .day .dt .os{color:var(--ink-2);font-weight:400}
-.day .glas{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.day .glas .lbl{font:500 .72rem/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
-.gbtn{min-width:30px;height:30px;border:1px solid var(--hairline);background:var(--raised);color:var(--ink-2);
-  font:500 .82rem/1 var(--sans);border-radius:3px;cursor:pointer;padding:0 4px}
-.gbtn:hover{border-color:var(--gold)}
-.gbtn[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#231d10}
-.day .hint{font:400 .78rem/1.4 var(--sans);color:var(--ink-soft);flex-basis:100%;max-width:70ch}
-.day .hint b{color:var(--gold-text);font-weight:500}
+
+
+
+
 
 /* ---------- contents dropdown ---------- */
 .toc{position:relative}
@@ -111,7 +107,7 @@ main{padding:8px 0 90px}
 .ln{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;padding:9px 0;border-bottom:1px solid #efe8db}
 .ln:last-child{border-bottom:0}
 .cell{min-width:0}
-.role{display:block;font:600 .64rem/1.4 var(--sans);letter-spacing:.11em;text-transform:uppercase;color:var(--gold-text);margin-bottom:2px}
+.role{grid-column:1/-1;display:block;font:600 .64rem/1.5 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-text);margin-bottom:3px}
 .cs-t{font-family:var(--cyr);font-size:1.12rem;line-height:1.62;color:var(--ink);white-space:pre-line}
 .tr-t{font-family:var(--serif);font-size:1.1rem;line-height:1.6;color:#33302b;white-space:pre-line}
 .said .cs-t,.said .tr-t{font-weight:400}
@@ -129,10 +125,8 @@ main{padding:8px 0 90px}
 .trow{padding:9px 12px;border-radius:4px;border:1px solid transparent;margin:3px 0;
   display:grid;grid-template-columns:1fr 1fr;gap:2px 22px}
 .trow .tag{grid-column:1/-1;font:600 .66rem/1.4 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
-.trow.hot{background:var(--lit-wash);border-color:var(--gold)}
-.trow.hot .tag{color:var(--gold-text)}
-body[data-glas] .trow.byglas:not(.hot){opacity:.4}
-body.dayfilter .trow.byday:not(.hot){opacity:.4}
+
+
 
 mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px}
 .hitline{background:#fff7e6}
@@ -187,7 +181,6 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
     <div class="tools">
       <select class="langpick" id="lang" aria-label="Translation language">
         <option value="en">English</option>
-        <option value="ru">Русский (перевод)</option>
         <option value="zh">中文</option>
         <option value="ms">Bahasa Melayu</option>
         <option value="ta">தமிழ்</option>
@@ -219,19 +212,6 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
 <section class="day">
   <div class="row">
     <div class="dt" id="dateLine"></div>
-    <div class="glas" role="group" aria-label="Tone of the week">
-      <span class="lbl" data-t="glas">Tone</span>
-      <button class="gbtn" data-g="1" type="button">1</button>
-      <button class="gbtn" data-g="2" type="button">2</button>
-      <button class="gbtn" data-g="3" type="button">3</button>
-      <button class="gbtn" data-g="4" type="button">4</button>
-      <button class="gbtn" data-g="5" type="button">5</button>
-      <button class="gbtn" data-g="6" type="button">6</button>
-      <button class="gbtn" data-g="7" type="button">7</button>
-      <button class="gbtn" data-g="8" type="button">8</button>
-      <button class="gbtn" data-g="0" type="button" data-t="allTones">all</button>
-    </div>
-    <p class="hint" id="dayHint" data-t="dayHint"></p>
   </div>
 </section>
 
@@ -355,20 +335,20 @@ function render(){
         r.appendChild(s); el.appendChild(r); return;
       }
       if(line.r==="table"){ el.appendChild(buildTable(line)); return; }
-      // normal bilingual line
+      // normal bilingual line — role shown once, spanning both columns
       const div=document.createElement("div");
       div.className="ln "+((line.r==="c"||line.r==="a")?"sung":"said");
+      const rn=roleName(line.r);
+      if(rn){ const rl=document.createElement("div"); rl.className="role"; rl.textContent=rn; div.appendChild(rl); }
       const c1=document.createElement("div"); c1.className="cell";
       const c2=document.createElement("div"); c2.className="cell";
-      const rn=roleName(line.r);
-      c1.innerHTML=(rn?'<span class="role">'+esc(rn)+'</span>':'')+'<span class="cs-t">'+esc(line.cs||"")+'</span>';
-      c2.innerHTML=(rn?'<span class="role">'+esc(rn)+'</span>':'')+'<span class="tr-t">'+esc(trOf(line))+'</span>';
+      c1.innerHTML='<span class="cs-t">'+esc(line.cs||"")+'</span>';
+      c2.innerHTML='<span class="tr-t">'+esc(trOf(line))+'</span>';
       div.appendChild(c1); div.appendChild(c2); el.appendChild(div);
     });
     main.appendChild(el);
   });
   buildTOC();
-  applyGlas(); applyDayFilter();
   if(document.getElementById("q").value) runSearch();
 }
 
@@ -475,51 +455,16 @@ function julianPascha(y){ const a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+3
   const m=Math.floor((d+e+114)/31), day=((d+e+114)%31)+1; return new Date(Date.UTC(y,m-1,day)); }
 function addDays(dt,n){ const x=new Date(dt); x.setUTCDate(x.getUTCDate()+n); return x; }
 function gregPascha(y){ return addDays(julianPascha(y),13); } // 1900-2099
-let suggestedGlas=0, curGlas=0, curDay=0;
 function computeDay(){
-  const now=new Date(); const y=now.getUTCFullYear();
+  const now=new Date();
   const today=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));
-  curDay=today.getUTCDay(); // 0 Sun .. 6 Sat
-  // Old-Style date = New Style - 13 days
-  const os=addDays(today,-13);
-  const loc={en:"en-GB",ru:"ru-RU",zh:"zh-CN",ms:"ms-MY",ta:"ta-IN",id:"id-ID",vi:"vi-VN",th:"th-TH",ko:"ko-KR",ja:"ja-JP",tl:"fil-PH"}[L()];
-  const optW={weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:"UTC"};
-  const nsStr=today.toLocaleDateString(loc,optW);
+  const os=addDays(today,-13); // Old-Style date = New Style - 13 days (1900-2099)
+  const loc={en:"en-GB",zh:"zh-CN",ms:"ms-MY",ta:"ta-IN",id:"id-ID",vi:"vi-VN",th:"th-TH",ko:"ko-KR",ja:"ja-JP",tl:"fil-PH"}[L()]||"en-GB";
+  const nsStr=today.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
   const osStr=os.toLocaleDateString(loc,{day:"numeric",month:"long",timeZone:"UTC"});
-  // estimate tone for ordinary time (after All Saints, before Triodion)
-  let pascha=gregPascha(y); if(today<pascha) pascha=gregPascha(y-1);
-  const pentecost=addDays(pascha,49);
-  const allSaints=addDays(pascha,56);
-  const weeks=Math.floor((today-allSaints)/(7*86400000));
-  suggestedGlas=0;
-  if(today>=allSaints){ // ordinary time
-    let n=weeks%8; // allSaints week -> tone 8
-    suggestedGlas = (n===0)?8:n; // week0=8,1=1,...7=7,8->0->8
-  }
-  const osLabel={en:"O.S.",ru:"ст. ст.",zh:"儒略历",ms:"K.L.",ta:"ப.மு.",id:"K.L.",vi:"CL",th:"จ.",ko:"구력",ja:"旧",tl:"L.L."}[L()]||"O.S.";
+  const osLabel={en:"O.S.",zh:"儒略历",ms:"K.L.",ta:"ப.மு.",id:"K.L.",vi:"CL",th:"จ.",ko:"구력",ja:"旧",tl:"L.L."}[L()]||"O.S.";
   document.getElementById("dateLine").innerHTML="<b>"+esc(nsStr)+"</b> &nbsp;·&nbsp; <span class='os'>"+esc(osStr)+" ("+esc(osLabel)+")</span>";
-  // mark suggested glas button
-  document.querySelectorAll(".gbtn").forEach(b=>{ b.classList.toggle("suggest", b.dataset.g==String(suggestedGlas) && suggestedGlas>0); });
-  if(curGlas===0 && suggestedGlas>0){ curGlas=suggestedGlas; }
-  setGlasButtons(); applyGlas(); applyDayFilter();
 }
-function setGlasButtons(){ document.querySelectorAll(".gbtn").forEach(b=>b.setAttribute("aria-pressed", b.dataset.g===String(curGlas))); }
-function applyGlas(){
-  if(curGlas>0){ document.body.setAttribute("data-glas",curGlas);
-    document.querySelectorAll(".trow.byglas").forEach(r=>r.classList.toggle("hot", r.dataset.glas===String(curGlas)));
-  } else { document.body.removeAttribute("data-glas");
-    document.querySelectorAll(".trow.byglas").forEach(r=>r.classList.remove("hot")); }
-}
-function applyDayFilter(){
-  // daily prokeimenon/communion by weekday (1=Mon..6=Sat, 0=Sun handled by glas)
-  const map={1:"mon",2:"tue",3:"wed",4:"thu",5:"fri",6:"sat",0:"sun"};
-  const key=map[curDay];
-  document.body.classList.add("dayfilter");
-  document.querySelectorAll(".trow.byday").forEach(r=>r.classList.toggle("hot", r.dataset.day===key));
-}
-document.querySelectorAll(".gbtn").forEach(b=>b.addEventListener("click",()=>{
-  curGlas=parseInt(b.dataset.g,10); setGlasButtons(); applyGlas();
-}));
 
 /* ---- back to top ---- */
 const toTop=document.getElementById("toTop");
