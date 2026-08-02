@@ -114,7 +114,7 @@ const LITURGY_DATA = {
 
  {id:"prokeimenon", t:{en:"The Prokeimenon and Alleluia"}, tcs:"Прокимен и Аллилуиа",
   lines:[
-   {r:"ru", en:"The reader announces the prokeimenon (with its tone); the choir sings it, then the verse, then it is repeated. After the Epistle, the choir sings the Alleluia three times in the appointed tone. Select the tone above to highlight the resurrectional set; on weekdays the daily prokeimenon is used.", ru:"Прокимен и аллилуиарий поются на глас. Выберите глас, чтобы выделить воскресный набор; в будни поется дневной прокимен."},
+   {r:"ru", en:"The reader announces the prokeimenon in the tone of the day; the choir sings it, then the verse, then it is repeated. After the Epistle the Alleluia is sung three times in the same tone. The set shown is for the chosen date — on Sundays the resurrectional tone, on weekdays the daily prokeimenon.", ru:"Прокимен и аллилуиарий поются на глас дня. Ниже показан набор для выбранной даты — в воскресенье воскресный глас, в будни дневной прокимен."},
    {r:"table", rows:[
      {tag:"Tone 1 · Глас 1", glas:"1", cs:"Прокимен: Буди, Господи, милость Твоя на нас, якоже уповахом на Тя. · Аллилуиа: Бог даяй отмщение мне, и покоривый люди под мя.", en:"Prokeimenon: Let Thy mercy, O Lord, be upon us, according as we have hoped in Thee. · Alleluia: It is God that giveth me vengeance, and hath subdued peoples under me."},
      {tag:"Tone 2 · Глас 2", glas:"2", cs:"Прокимен: Крепость моя и пение мое Господь, и бысть мне во спасение. · Аллилуиа: Услышит тя Господь в день печали, защитит тя имя Бога Иаковля.", en:"Prokeimenon: The Lord is my strength and my song, and is become my salvation. · Alleluia: The Lord hear thee in the day of affliction; the Name of the God of Jacob defend thee."},
@@ -125,7 +125,7 @@ const LITURGY_DATA = {
      {tag:"Tone 7 · Глас 7", glas:"7", cs:"Прокимен: Господь крепость людем Своим даст, Господь благословит люди Своя миром. · Аллилуиа: Благо есть исповедатися Господеви, и пети Имени Твоему, Вышний.", en:"Prokeimenon: The Lord will give strength unto His people; the Lord will bless His people with peace. · Alleluia: It is good to give thanks unto the Lord, and to chant unto Thy Name, O Most High."},
      {tag:"Tone 8 · Глас 8", glas:"8", cs:"Прокимен: Помолитеся и воздадите Господеви Богу нашему. · Аллилуиа: Приидите, возрадуемся Господеви, воскликнем Богу Спасителю нашему.", en:"Prokeimenon: Make your vows and pay them to the Lord our God. · Alleluia: O come, let us rejoice in the Lord; let us shout with jubilation unto God our Saviour."}
    ]},
-   {r:"ru", en:"Daily prokeimena (weekdays):", ru:"Прокимны дневные (будничные):"},
+   {r:"ru", _grp:"dayprok", en:"Daily prokeimena (weekdays):", ru:"Прокимны дневные (будничные):"},
    {r:"table", rows:[
      {tag:"Monday", day:"mon", cs:"Прокимен: Творяй ангелы Своя духи, и слуги Своя пламень огненный.", en:"Prokeimenon: He maketh His angels spirits, and His ministers a flame of fire."},
      {tag:"Tuesday", day:"tue", cs:"Прокимен: Возвеселится праведник о Господе, и уповает на Него.", en:"Prokeimenon: The righteous shall be glad in the Lord, and shall hope in Him."},
@@ -309,7 +309,7 @@ const LITURGY_DATA = {
 
  {id:"communionVerse", t:{en:"The Communion Verse"}, tcs:"Причастен",
   lines:[
-   {r:"ru", en:"While the clergy commune, the choir sings the communion verse of the day (each ends with a threefold Alleluia). Select the day above to highlight it; on feasts the festal verse is used.", ru:"Причастен дня поется, пока причащаются священнослужители; в конце — «аллилуиа» трижды. В праздники поется праздничный причастен."},
+   {r:"ru", en:"While the clergy commune, the choir sings the communion verse of the day (each ends with a threefold Alleluia); on feasts the festal verse is used. The verse shown is for the chosen date.", ru:"Причастен дня поется, пока причащаются священнослужители; в конце — «аллилуиа» трижды. Ниже показан причастен выбранной даты. В праздники поется праздничный причастен."},
    {r:"table", rows:[
      {tag:"Sunday", day:"sun", cs:"Хвалите Господа с небес, хвалите Его в вышних. Аллилуиа, аллилуиа, аллилуиа.", en:"Praise the Lord from the heavens; praise Him in the highest. Alleluia, alleluia, alleluia."},
      {tag:"Monday", day:"mon", cs:"Творяй ангелы Своя духи, и слуги Своя пламень огненный. Аллилуиа.", en:"He maketh His angels spirits, and His ministers a flame of fire. Alleluia."},
