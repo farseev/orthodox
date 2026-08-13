@@ -21,4 +21,24 @@
       <image:title>The Divine Liturgy of St John Chrysostom — Church Slavonic and English</image:title>
     </image:image>
   </url>
+  <url>
+    <loc>https://orthodox.sg/calendar.html</loc>
+    <lastmod>2026-08-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://orthodox.sg/photos/og-calendar.jpg</image:loc>
+      <image:title>Daily Orthodox Calendar — Saints, Readings, Fasting, Service Rubric</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://orthodox.sg/fasting.html</loc>
+    <lastmod>2026-08-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://orthodox.sg/photos/og-fasting.jpg</image:loc>
+      <image:title>Orthodox Fasting Calendar — Today's Fasting Rule, Singapore</image:title>
+    </image:image>
+  </url>
 </urlset>

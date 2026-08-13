@@ -41,8 +41,14 @@ English, Russian, Chinese, Malay, Tamil, Indonesian, Vietnamese, Thai, Korean, J
 ## Follow the service
 - The full text of the Divine Liturgy of St John Chrysostom, in Church Slavonic and English side by side (searchable, with the tone of the week and the day's propers marked), is at https://orthodox.sg/liturgy.html
 
+## Daily calendar and fasting
+- The daily Orthodox calendar — commemorated saints, Epistle and Gospel readings, the tone of the week and the full service rubric, for any date, in 11 languages — is at https://orthodox.sg/calendar.html (deep-linkable with ?date=YYYY-MM-DD&lang=xx).
+- Today's Orthodox fasting rule — what may and may not be eaten, with fasting-appropriate restaurant suggestions near a chosen Singapore neighbourhood — is at https://orthodox.sg/fasting.html (deep-linkable with ?date=YYYY-MM-DD&lang=xx&area=Name).
+
 ## Key links
 - Website: https://orthodox.sg/
+- Daily calendar: https://orthodox.sg/calendar.html
+- Fasting guide: https://orthodox.sg/fasting.html
 - Facebook group: https://www.facebook.com/groups/453874144142182/
 - Questions (WhatsApp): https://wa.me/6564622448
 
