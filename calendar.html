@@ -245,17 +245,28 @@ html[lang="th"]{--serif:'Noto Serif Thai',serif} html[lang="ko"]{--serif:'Noto S
 html[lang="ja"]{--serif:'Noto Serif JP',serif}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 :focus-visible{outline:2px solid var(--lit-deep);outline-offset:2px}
-/* ---- share bar ---- */
-.sharebar{background:var(--raised);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);padding:22px 0 26px}
-.sharebar .row{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;max-width:1080px;margin:0 auto;padding:0 16px}
-.sharebar .sb-label{margin:0;font:500 .86rem/1.35 var(--sans);color:var(--ink-2);flex:1 1 auto;min-width:200px}
-.sb-btns{display:flex;gap:9px;flex:none}
-.sb-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--hairline);
-  background:var(--page);color:var(--gold-text);border-radius:50%;cursor:pointer;padding:0;text-decoration:none;transition:.15s;flex:none}
-.sb-btn svg{width:18px;height:18px}
-.sb-btn:hover{border-color:var(--gold);background:#F4E3B7}
+/* ---- share bar (top-of-page call to action) ---- */
+.sharecta{background:#F4E3B7;border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:18px 0}
+.sharecta .row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;max-width:1080px;margin:0 auto;padding:0 16px}
+.sc-head{flex:1 1 260px;min-width:220px;display:flex;flex-direction:column;gap:2px}
+.sc-title{font:600 1.02rem/1.3 var(--serif);color:var(--deep)}
+.sc-sub{font:400 .82rem/1.4 var(--sans);color:var(--ink-2)}
+.sb-btns{display:flex;gap:9px;flex-wrap:wrap;flex:none}
+.sb-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--gold);
+  background:var(--raised);color:var(--gold-text);border-radius:50%;cursor:pointer;padding:0;text-decoration:none;transition:.15s;flex:none}
+.sb-btn svg{width:19px;height:19px}
+.sb-letter{font:700 .92rem/1 var(--serif)}
+.sb-btn:hover{background:var(--gold-text);color:#fff;border-color:var(--gold-text)}
 .sb-copied{flex-basis:100%;margin:0;font:500 .82rem/1.35 var(--sans);color:var(--gold-text);display:none}
 .sb-copied.show{display:block}
+@media (max-width:640px){ .sc-head{flex-basis:100%} }
+
+/* ---- cross-links to the other two resource pages ---- */
+.crosslinks{background:var(--page);border-bottom:1px solid var(--hairline);padding:9px 0}
+.crosslinks .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;max-width:1080px;margin:0 auto;padding:0 16px;font:500 .82rem/1 var(--sans)}
+.crosslinks .cl-label{color:var(--ink-soft);font-size:.76rem}
+.crosslinks a{color:var(--gold-text);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px;transition:.15s}
+.crosslinks a:hover{border-bottom-color:var(--gold-text)}
 </style>
 </head>
 <body>
@@ -298,6 +309,14 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
   </div>
 </header>
 
+<div class="crosslinks">
+  <div class="row">
+    <span class="cl-label" data-t="moreRes">More resources:</span>
+    <a href="liturgy.html" data-t="clLiturgy">Divine Liturgy text →</a>
+      <a href="fasting.html" data-t="clFasting">Today's fasting →</a>
+  </div>
+</div>
+
 <section class="day">
   <div class="row">
     <div class="datepick">
@@ -311,16 +330,21 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
   </div>
 </section>
 
-<main id="main"></main>
-
-<button id="toTop" aria-label="Back to top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
-
-<section class="sharebar" id="shareBar">
+<section class="sharecta" id="shareBar">
   <div class="row">
-    <p class="sb-label" data-t="shareLabel">Share today's entry</p>
+    <div class="sc-head">
+      <strong class="sc-title" data-t="shareCtaTitle">Share today's calendar with your community</strong>
+      <span class="sc-sub" data-t="shareCtaSub">One tap — everyone can see today's saints and readings, and check it for themselves.</span>
+    </div>
     <div class="sb-btns">
       <a class="sb-btn" id="shWhatsapp" href="#" target="_blank" rel="noopener" aria-label="Share on WhatsApp">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 18l1.1-3.3A7.5 7.5 0 1 1 10 17.6L6 18Z"/><path d="M9 10.5c0 3 2.5 5.5 5.5 5.5"/></svg>
+      </a>
+      <a class="sb-btn" id="shTelegram" href="#" target="_blank" rel="noopener" aria-label="Share on Telegram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      </a>
+      <a class="sb-btn" id="shMax" href="#" target="_blank" rel="noopener" aria-label="Share on MAX">
+        <span class="sb-letter">M</span>
       </a>
       <a class="sb-btn" id="shFacebook" href="#" target="_blank" rel="noopener" aria-label="Share on Facebook">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 9h2V6h-2c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2.2l.8-3H14V9Z"/></svg>
@@ -338,6 +362,10 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
     <p class="sb-copied" id="shCopied" data-t="shareCopied">Link copied</p>
   </div>
 </section>
+
+<main id="main"></main>
+
+<button id="toTop" aria-label="Back to top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
 
 <footer>
   <div class="row">
@@ -454,6 +482,36 @@ const SHARE_UI = {
  tl:{shareLabel:"Ibahagi ang ngayong araw — direktang bubuksan ng link ang araw na ito.",shareCopied:"Nakopya ang link — i-paste sa Instagram o TikTok."},
 };
 for(const l in SHARE_UI){ if(UI[l]) Object.assign(UI[l], SHARE_UI[l]); }
+
+const SHARE_CTA_UI = {
+ en:{shareCtaTitle:"Share today's calendar with your community",shareCtaSub:"One tap — everyone can see today's saints and readings, and check it for themselves."},
+ ru:{shareCtaTitle:"Поделитесь сегодняшним календарём с приходом",shareCtaSub:"Один клик — все смогут увидеть сегодняшних святых и чтения и проверить это сами."},
+ zh:{shareCtaTitle:"与教区分享今日历表",shareCtaSub:"轻轻一点——大家都能看到今天的圣徒和读经，并自行核实。"},
+ ms:{shareCtaTitle:"Kongsi kalendar hari ini dengan komuniti anda",shareCtaSub:"Satu ketikan — semua orang boleh melihat orang kudus dan bacaan hari ini, dan menyemaknya sendiri."},
+ ta:{shareCtaTitle:"இன்றைய நாள்காட்டியை உங்கள் சமூகத்துடன் பகிரவும்",shareCtaSub:"ஒரே தட்டு — அனைவரும் இன்றைய புனிதர்களையும் வாசகங்களையும் காணலாம், தாங்களே சரிபார்க்கலாம்."},
+ id:{shareCtaTitle:"Bagikan kalender hari ini dengan komunitas Anda",shareCtaSub:"Satu ketukan — semua orang bisa melihat orang kudus dan bacaan hari ini, dan memeriksanya sendiri."},
+ vi:{shareCtaTitle:"Chia sẻ lịch hôm nay với cộng đoàn của bạn",shareCtaSub:"Chỉ một chạm — mọi người đều có thể xem các thánh và bài đọc hôm nay, và tự mình kiểm chứng."},
+ th:{shareCtaTitle:"แชร์ปฏิทินวันนี้กับชุมชนของคุณ",shareCtaSub:"แตะเดียว — ทุกคนสามารถดูนักบุญและบทอ่านของวันนี้ และตรวจสอบได้ด้วยตนเอง"},
+ ko:{shareCtaTitle:"오늘의 달력을 공동체와 공유하세요",shareCtaSub:"한 번의 터치로 — 모두가 오늘의 성인과 읽기를 보고 직접 확인할 수 있습니다."},
+ ja:{shareCtaTitle:"本日の暦を共同体と共有しましょう",shareCtaSub:"ワンタップで — 誰もが本日の聖人と聖書朗読を見て、自分で確認できます。"},
+ tl:{shareCtaTitle:"Ibahagi ang kalendaryo ngayon sa inyong komunidad",shareCtaSub:"Isang tap lamang — makikita ng lahat ang mga santo at pagbasa ngayon, at mabeberify nila mismo."},
+};
+for(const l in SHARE_CTA_UI){ if(UI[l]) Object.assign(UI[l], SHARE_CTA_UI[l]); }
+
+const CROSSLINK_UI = {
+ en:{moreRes:"More resources:",clLiturgy:"Divine Liturgy text →",clFasting:"Today's fasting →",clCalendar:"Daily calendar →"},
+ ru:{moreRes:"Другие ресурсы:",clLiturgy:"Текст Литургии →",clFasting:"Пост сегодня →",clCalendar:"Церковный календарь →"},
+ zh:{moreRes:"更多资源：",clLiturgy:"礼仪文本 →",clFasting:"今日斋期 →",clCalendar:"每日历表 →"},
+ ms:{moreRes:"Sumber lain:",clLiturgy:"Teks Liturgi Ilahi →",clFasting:"Puasa hari ini →",clCalendar:"Kalendar harian →"},
+ ta:{moreRes:"மேலும் வளங்கள்:",clLiturgy:"திருப்பலி உரை →",clFasting:"இன்றைய நோன்பு →",clCalendar:"தினசரி நாள்காட்டி →"},
+ id:{moreRes:"Sumber lain:",clLiturgy:"Teks Liturgi Ilahi →",clFasting:"Puasa hari ini →",clCalendar:"Kalender harian →"},
+ vi:{moreRes:"Tài nguyên khác:",clLiturgy:"Văn bản Phụng vụ →",clFasting:"Chay hôm nay →",clCalendar:"Lịch hằng ngày →"},
+ th:{moreRes:"แหล่งข้อมูลเพิ่มเติม:",clLiturgy:"บทพิธีศักดิ์สิทธิ์ →",clFasting:"การถือศีลอดวันนี้ →",clCalendar:"ปฏิทินประจำวัน →"},
+ ko:{moreRes:"더 많은 자료:",clLiturgy:"성찬예배 본문 →",clFasting:"오늘의 금식 →",clCalendar:"매일 달력 →"},
+ ja:{moreRes:"その他のリソース:",clLiturgy:"聖体礼儀のテキスト →",clFasting:"本日の斎 →",clCalendar:"日々の暦 →"},
+ tl:{moreRes:"Karagdagang mapagkukunan:",clLiturgy:"Teksto ng Banal na Liturhiya →",clFasting:"Pag-aayuno ngayon →",clCalendar:"Araw-araw na kalendaryo →"},
+};
+for(const l in CROSSLINK_UI){ if(UI[l]) Object.assign(UI[l], CROSSLINK_UI[l]); }
 
 /* ============================================================
    CALENDAR DATA — embedded (per project instruction: single file,
@@ -111883,7 +111941,10 @@ function shareContext(){
 /* ---- share bar: always rebuilt from the day/language currently on screen ---- */
 function updateShare(){
   const ctx=shareContext();
-  const wa=document.getElementById("shWhatsapp"); if(wa) wa.href="https://wa.me/?text="+encodeURIComponent(ctx.text+"\n"+ctx.url);
+  const combined=ctx.text+"\n"+ctx.url;
+  const wa=document.getElementById("shWhatsapp"); if(wa) wa.href="https://wa.me/?text="+encodeURIComponent(combined);
+  const tg=document.getElementById("shTelegram"); if(tg) tg.href="https://t.me/share/url?url="+encodeURIComponent(ctx.url)+"&text="+encodeURIComponent(ctx.text);
+  const mx=document.getElementById("shMax"); if(mx) mx.href="https://max.ru/:share?text="+encodeURIComponent(combined);
   const fb=document.getElementById("shFacebook"); if(fb) fb.href="https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(ctx.url);
   const li=document.getElementById("shLinkedin"); if(li) li.href="https://www.linkedin.com/sharing/share-offsite/?url="+encodeURIComponent(ctx.url);
 }

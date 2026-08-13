@@ -202,17 +202,28 @@ html[lang="th"]{--serif:'Noto Serif Thai',serif} html[lang="ko"]{--serif:'Noto S
 html[lang="ja"]{--serif:'Noto Serif JP',serif}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 :focus-visible{outline:2px solid var(--lit-deep);outline-offset:2px}
-/* ---- share bar ---- */
-.sharebar{background:var(--raised);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);padding:22px 0 26px}
-.sharebar .row{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;max-width:1080px;margin:0 auto;padding:0 16px}
-.sharebar .sb-label{margin:0;font:500 .86rem/1.35 var(--sans);color:var(--ink-2);flex:1 1 auto;min-width:200px}
-.sb-btns{display:flex;gap:9px;flex:none}
-.sb-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--hairline);
-  background:var(--page);color:var(--gold-text);border-radius:50%;cursor:pointer;padding:0;text-decoration:none;transition:.15s;flex:none}
-.sb-btn svg{width:18px;height:18px}
-.sb-btn:hover{border-color:var(--gold);background:#F4E3B7}
+/* ---- share bar (top-of-page call to action) ---- */
+.sharecta{background:#F4E3B7;border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:18px 0}
+.sharecta .row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;max-width:1080px;margin:0 auto;padding:0 16px}
+.sc-head{flex:1 1 260px;min-width:220px;display:flex;flex-direction:column;gap:2px}
+.sc-title{font:600 1.02rem/1.3 var(--serif);color:var(--deep)}
+.sc-sub{font:400 .82rem/1.4 var(--sans);color:var(--ink-2)}
+.sb-btns{display:flex;gap:9px;flex-wrap:wrap;flex:none}
+.sb-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--gold);
+  background:var(--raised);color:var(--gold-text);border-radius:50%;cursor:pointer;padding:0;text-decoration:none;transition:.15s;flex:none}
+.sb-btn svg{width:19px;height:19px}
+.sb-letter{font:700 .92rem/1 var(--serif)}
+.sb-btn:hover{background:var(--gold-text);color:#fff;border-color:var(--gold-text)}
 .sb-copied{flex-basis:100%;margin:0;font:500 .82rem/1.35 var(--sans);color:var(--gold-text);display:none}
 .sb-copied.show{display:block}
+@media (max-width:640px){ .sc-head{flex-basis:100%} }
+
+/* ---- cross-links to the other two resource pages ---- */
+.crosslinks{background:var(--page);border-bottom:1px solid var(--hairline);padding:9px 0}
+.crosslinks .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;max-width:1080px;margin:0 auto;padding:0 16px;font:500 .82rem/1 var(--sans)}
+.crosslinks .cl-label{color:var(--ink-soft);font-size:.76rem}
+.crosslinks a{color:var(--gold-text);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px;transition:.15s}
+.crosslinks a:hover{border-bottom-color:var(--gold-text)}
 .venue-kicker{font:600 .74rem/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-text);margin:16px 0 -6px}
 </style>
 </head>
@@ -241,6 +252,14 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
   </div>
 </header>
 
+<div class="crosslinks">
+  <div class="row">
+    <span class="cl-label" data-t="moreRes">More resources:</span>
+    <a href="liturgy.html" data-t="clLiturgy">Divine Liturgy text →</a>
+      <a href="calendar.html" data-t="clCalendar">Daily calendar →</a>
+  </div>
+</div>
+
 <section class="day">
   <div class="row">
     <div class="datepick">
@@ -250,6 +269,39 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
     </div>
     <div class="dt" id="dateLine"></div>
     <span class="fastbadge" id="fastBadge"><i></i><span id="fastBadgeText"></span></span>
+  </div>
+</section>
+
+<section class="sharecta" id="shareBar">
+  <div class="row">
+    <div class="sc-head">
+      <strong class="sc-title" data-t="shareCtaTitle">Share today's fasting rule with your community</strong>
+      <span class="sc-sub" data-t="shareCtaSub">One tap — everyone can see today's fasting rule, and check it for themselves.</span>
+    </div>
+    <div class="sb-btns">
+      <a class="sb-btn" id="shWhatsapp" href="#" target="_blank" rel="noopener" aria-label="Share on WhatsApp">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 18l1.1-3.3A7.5 7.5 0 1 1 10 17.6L6 18Z"/><path d="M9 10.5c0 3 2.5 5.5 5.5 5.5"/></svg>
+      </a>
+      <a class="sb-btn" id="shTelegram" href="#" target="_blank" rel="noopener" aria-label="Share on Telegram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      </a>
+      <a class="sb-btn" id="shMax" href="#" target="_blank" rel="noopener" aria-label="Share on MAX">
+        <span class="sb-letter">M</span>
+      </a>
+      <a class="sb-btn" id="shFacebook" href="#" target="_blank" rel="noopener" aria-label="Share on Facebook">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 9h2V6h-2c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2.2l.8-3H14V9Z"/></svg>
+      </a>
+      <a class="sb-btn" id="shLinkedin" href="#" target="_blank" rel="noopener" aria-label="Share on LinkedIn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 9.5v8M6.5 6.5v.01M11 17.5v-4.5c0-1.4 1-2.5 2.5-2.5s2.5 1.1 2.5 2.5v4.5M11 9.5v8"/></svg>
+      </a>
+      <button type="button" class="sb-btn" id="shInstagram" aria-label="Share to Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4.5" y="4.5" width="15" height="15" rx="4"/><circle cx="12" cy="12" r="3.3"/><path d="M16 8h.01"/></svg>
+      </button>
+      <button type="button" class="sb-btn" id="shTiktok" aria-label="Share to TikTok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 4v10.2a2.8 2.8 0 1 1-2-2.7"/><path d="M13 4c.3 2 1.8 3.5 3.5 3.7"/></svg>
+      </button>
+    </div>
+    <p class="sb-copied" id="shCopied" data-t="shareCopied">Link copied</p>
   </div>
 </section>
 
@@ -315,30 +367,6 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
 </section>
 
 </main>
-
-<section class="sharebar" id="shareBar">
-  <div class="row">
-    <p class="sb-label" data-t="shareLabel">Share today's fasting status</p>
-    <div class="sb-btns">
-      <a class="sb-btn" id="shWhatsapp" href="#" target="_blank" rel="noopener" aria-label="Share on WhatsApp">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 18l1.1-3.3A7.5 7.5 0 1 1 10 17.6L6 18Z"/><path d="M9 10.5c0 3 2.5 5.5 5.5 5.5"/></svg>
-      </a>
-      <a class="sb-btn" id="shFacebook" href="#" target="_blank" rel="noopener" aria-label="Share on Facebook">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 9h2V6h-2c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2.2l.8-3H14V9Z"/></svg>
-      </a>
-      <a class="sb-btn" id="shLinkedin" href="#" target="_blank" rel="noopener" aria-label="Share on LinkedIn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 9.5v8M6.5 6.5v.01M11 17.5v-4.5c0-1.4 1-2.5 2.5-2.5s2.5 1.1 2.5 2.5v4.5M11 9.5v8"/></svg>
-      </a>
-      <button type="button" class="sb-btn" id="shInstagram" aria-label="Share to Instagram">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4.5" y="4.5" width="15" height="15" rx="4"/><circle cx="12" cy="12" r="3.3"/><path d="M16 8h.01"/></svg>
-      </button>
-      <button type="button" class="sb-btn" id="shTiktok" aria-label="Share to TikTok">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 4v10.2a2.8 2.8 0 1 1-2-2.7"/><path d="M13 4c.3 2 1.8 3.5 3.5 3.7"/></svg>
-      </button>
-    </div>
-    <p class="sb-copied" id="shCopied" data-t="shareCopied">Link copied</p>
-  </div>
-</section>
 
 <footer>
   <div class="row">
@@ -581,6 +609,36 @@ const SHARE_UI = {
 };
 for(const l in SHARE_UI){ if(UI[l]) Object.assign(UI[l], SHARE_UI[l]); }
 
+const SHARE_CTA_UI = {
+ en:{shareCtaTitle:"Share today's fasting rule with your community",shareCtaSub:"One tap — everyone can see today's fasting rule, and check it for themselves."},
+ ru:{shareCtaTitle:"Поделитесь сегодняшним постным правилом с приходом",shareCtaSub:"Один клик — все смогут увидеть сегодняшнее постное правило и проверить это сами."},
+ zh:{shareCtaTitle:"与教区分享今日斋期规定",shareCtaSub:"轻轻一点——大家都能看到今天的斋期规定，并自行核实。"},
+ ms:{shareCtaTitle:"Kongsi peraturan puasa hari ini dengan komuniti anda",shareCtaSub:"Satu ketikan — semua orang boleh melihat peraturan puasa hari ini, dan menyemaknya sendiri."},
+ ta:{shareCtaTitle:"இன்றைய நோன்பு விதியை உங்கள் சமூகத்துடன் பகிரவும்",shareCtaSub:"ஒரே தட்டு — அனைவரும் இன்றைய நோன்பு விதியைக் காணலாம், தாங்களே சரிபார்க்கலாம்."},
+ id:{shareCtaTitle:"Bagikan aturan puasa hari ini dengan komunitas Anda",shareCtaSub:"Satu ketukan — semua orang bisa melihat aturan puasa hari ini, dan memeriksanya sendiri."},
+ vi:{shareCtaTitle:"Chia sẻ quy tắc chay hôm nay với cộng đoàn của bạn",shareCtaSub:"Chỉ một chạm — mọi người đều có thể xem quy tắc chay hôm nay, và tự mình kiểm chứng."},
+ th:{shareCtaTitle:"แชร์กฎการถือศีลอดวันนี้กับชุมชนของคุณ",shareCtaSub:"แตะเดียว — ทุกคนสามารถดูกฎการถือศีลอดของวันนี้ และตรวจสอบได้ด้วยตนเอง"},
+ ko:{shareCtaTitle:"오늘의 금식 규정을 공동체와 공유하세요",shareCtaSub:"한 번의 터치로 — 모두가 오늘의 금식 규정을 보고 직접 확인할 수 있습니다."},
+ ja:{shareCtaTitle:"本日の斎の規定を共同体と共有しましょう",shareCtaSub:"ワンタップで — 誰もが本日の斎の規定を見て、自分で確認できます。"},
+ tl:{shareCtaTitle:"Ibahagi ang panuntunan ng ayuno ngayon sa inyong komunidad",shareCtaSub:"Isang tap lamang — makikita ng lahat ang panuntunan ng ayuno ngayon, at mabeberify nila mismo."},
+};
+for(const l in SHARE_CTA_UI){ if(UI[l]) Object.assign(UI[l], SHARE_CTA_UI[l]); }
+
+const CROSSLINK_UI = {
+ en:{moreRes:"More resources:",clLiturgy:"Divine Liturgy text →",clFasting:"Today's fasting →",clCalendar:"Daily calendar →"},
+ ru:{moreRes:"Другие ресурсы:",clLiturgy:"Текст Литургии →",clFasting:"Пост сегодня →",clCalendar:"Церковный календарь →"},
+ zh:{moreRes:"更多资源：",clLiturgy:"礼仪文本 →",clFasting:"今日斋期 →",clCalendar:"每日历表 →"},
+ ms:{moreRes:"Sumber lain:",clLiturgy:"Teks Liturgi Ilahi →",clFasting:"Puasa hari ini →",clCalendar:"Kalendar harian →"},
+ ta:{moreRes:"மேலும் வளங்கள்:",clLiturgy:"திருப்பலி உரை →",clFasting:"இன்றைய நோன்பு →",clCalendar:"தினசரி நாள்காட்டி →"},
+ id:{moreRes:"Sumber lain:",clLiturgy:"Teks Liturgi Ilahi →",clFasting:"Puasa hari ini →",clCalendar:"Kalender harian →"},
+ vi:{moreRes:"Tài nguyên khác:",clLiturgy:"Văn bản Phụng vụ →",clFasting:"Chay hôm nay →",clCalendar:"Lịch hằng ngày →"},
+ th:{moreRes:"แหล่งข้อมูลเพิ่มเติม:",clLiturgy:"บทพิธีศักดิ์สิทธิ์ →",clFasting:"การถือศีลอดวันนี้ →",clCalendar:"ปฏิทินประจำวัน →"},
+ ko:{moreRes:"더 많은 자료:",clLiturgy:"성찬예배 본문 →",clFasting:"오늘의 금식 →",clCalendar:"매일 달력 →"},
+ ja:{moreRes:"その他のリソース:",clLiturgy:"聖体礼儀のテキスト →",clFasting:"本日の斎 →",clCalendar:"日々の暦 →"},
+ tl:{moreRes:"Karagdagang mapagkukunan:",clLiturgy:"Teksto ng Banal na Liturhiya →",clFasting:"Pag-aayuno ngayon →",clCalendar:"Araw-araw na kalendaryo →"},
+};
+for(const l in CROSSLINK_UI){ if(UI[l]) Object.assign(UI[l], CROSSLINK_UI[l]); }
+
 /* ============================================================
    SINGAPORE PLANNING AREAS — official URA 55 areas / 5 regions.
    Centroids are city-level approximations for nearest-area GPS
@@ -591,7 +649,8 @@ const AREAS = [{"n": "Ang Mo Kio", "r": "North-East", "lat": 1.3691, "lng": 103.
 /* Hand-checked venues, grouped by REGION (curation happens at region
    grain; GPS/manual selection resolves to the precise area, and the
    live search links below use that exact area name). */
-const VENUES = {"Central": {"veg": [{"name": "Whole Earth", "area": "Peck Seah Street, Tanjong Pagar (Outram)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Peranakan & Thai vegetarian, plant-based throughout the menu.", "ru": "Перанаканская и тайская вегетарианская кухня, всё меню растительное."}}, {"name": "Annalakshmi", "area": "Shenton Way (Downtown Core)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Indian vegetarian, donation-based; egg-free.", "ru": "Индийская вегетарианская кухня, оплата по желанию; без яиц."}}, {"name": "Komala Vilas", "area": "Serangoon Road, Little India (Rochor)", "tag": {"en": "South Indian, thali", "ru": "Южноиндийская, тали"}, "desc": {"en": "Long-running South Indian vegetarian — thalis, dosa, very affordable.", "ru": "Давно работающий южноиндийский вегетарианский ресторан — тали, доса, очень доступно."}}, {"name": "Herbivore (Fortune Centre)", "area": "Middle Road (Museum/Rochor)", "tag": {"en": "Food hall", "ru": "Фуд-холл"}, "desc": {"en": "A mall with several vegan/vegetarian stalls under one roof.", "ru": "Торговый центр с несколькими веганскими/вегетарианскими лавками под одной крышей."}}, {"name": "LingZhi Vegetarian", "area": "Liat Towers, Orchard Road (Orchard)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Chinese-style vegetarian, mock-meat dishes.", "ru": "Китайская вегетарианская кухня, блюда из соевых аналогов мяса."}}], "fish": [{"name": "Chinatown Seafood Restaurant", "area": "51 Pagoda Street, Chinatown (Outram)", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Cantonese-style seafood house in the heart of Chinatown — chilli and pepper crab.", "ru": "Ресторан кантонской кухни морепродуктов в центре Чайнатауна — крабы чили и перечные крабы."}}, {"name": "Long Beach Seafood (Dempsey Hill)", "area": "Dempsey Road, Tanglin", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "The chilli-crab institution that helped invent the dish, since the 1940s-50s; Dempsey branch.", "ru": "Легендарный ресторан, стоявший у истоков крабов чили с 1940-50-х годов; филиал на Демпси-Хилл."}}], "free": [{"name": "Maxwell Food Centre", "area": "Kadayanallur Street, Chinatown (Outram)", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "One of Singapore's most famous hawker centres — every cuisine, right by Chinatown.", "ru": "Один из самых известных хокер-центров Сингапура — кухни на любой вкус, рядом с Чайнатауном."}}]}, "East": {"veg": [{"name": "Vegetarian Food stall, Bedok Interchange Hawker Centre", "area": "Bedok", "tag": {"en": "Hawker stall", "ru": "Лавка на фудкорте"}, "desc": {"en": "A dedicated vegetarian stall inside the Bedok Interchange hawker centre.", "ru": "Отдельная вегетарианская лавка на фудкорте Bedok Interchange."}}, {"name": "Vegetarian stall, Tampines Mart", "area": "Tampines", "tag": {"en": "Hawker stall", "ru": "Лавка на фудкорте"}, "desc": {"en": "Vegetarian rice/noodle stall at the Tampines Mart food court.", "ru": "Вегетарианская лавка (рис/лапша) на фудкорте Tampines Mart."}}, {"name": "Saute Saranghae", "area": "Tampines 1 Mall", "tag": {"en": "Halal-certified, Korean-Japanese", "ru": "Халяль, корейско-японская"}, "desc": {"en": "Vegetarian-friendly Korean-Japanese chain; check the meat-free items.", "ru": "Сеть с корейско-японской кухней и вегетарианскими блюдами; уточняйте позиции без мяса."}}], "fish": [{"name": "JUMBO Seafood", "area": "East Coast Seafood Centre, Bedok", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Singapore's best-known chilli-crab restaurant chain; flagship at the East Coast Seafood Centre.", "ru": "Самая известная сеть ресторанов с крабами чили в Сингапуре; флагман в East Coast Seafood Centre."}}, {"name": "Long Beach Seafood", "area": "East Coast Seafood Centre, Bedok", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "The original chilli-crab restaurant, in business since the 1940s-50s.", "ru": "Ресторан, где появились крабы чили; работает с 1940-50-х годов."}}], "free": [{"name": "East Coast Lagoon Food Village", "area": "East Coast Park", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "A beachside hawker centre — satay, seafood and just about everything else.", "ru": "Хокер-центр у моря — сатай, морепродукты и почти всё остальное."}}]}, "North": {"veg": [{"name": "Real Food", "area": "Yishun Central 1", "tag": {"en": "Restaurant & grocer", "ru": "Ресторан и магазин"}, "desc": {"en": "Vegetarian restaurant and health-food grocer.", "ru": "Вегетарианский ресторан и магазин здорового питания."}}, {"name": "elemen", "area": "Woodlands Heights (also Paya Lebar, Marina)", "tag": {"en": "Restaurant chain", "ru": "Сеть ресторанов"}, "desc": {"en": "Chinese-style vegetarian chain; several branches around Singapore.", "ru": "Сеть китайской вегетарианской кухни; несколько филиалов по Сингапуру."}}], "fish": [{"name": "Beaulieu House", "area": "117 Beaulieu Road, Sembawang Park", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "A colonial-era house on the waterfront at Sembawang Park, now a seafood restaurant.", "ru": "Дом колониальной эпохи на набережной парка Sembawang, теперь ресторан морепродуктов."}}, {"name": "1036 Live Seafood", "area": "1036 Sembawang Road", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Neighbourhood live-seafood restaurant on Sembawang Road.", "ru": "Районный ресторан живых морепродуктов на Sembawang Road."}}], "free": [{"name": "Yishun Park Hawker Centre", "area": "Yishun Avenue 4", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "A modern, well-reviewed hawker centre in the north of the island.", "ru": "Современный, хорошо оцениваемый хокер-центр на севере острова."}}]}, "North-East": {"veg": [{"name": "33 Vegetarian Food", "area": "Ang Mo Kio", "tag": {"en": "Hawker stall", "ru": "Лавка на фудкорте"}, "desc": {"en": "Known for vegetarian “chicken” rice made from tofu skin.", "ru": "Известна вегетарианским рисом с «курицей» из тофу-плёнки."}}, {"name": "Divine Vegetarian Family Restaurant", "area": "Hougang Ave 7/8", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Neighbourhood Chinese-style vegetarian restaurant.", "ru": "Районный ресторан китайской вегетарианской кухни."}}, {"name": "Greenland Vegetarian Restaurant", "area": "Upper Serangoon Road (Serangoon)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Long-standing Chinese-style vegetarian restaurant.", "ru": "Давно работающий ресторан китайской вегетарианской кухни."}}, {"name": "Nature Vegetarian Delights", "area": "Sengkang (also Bukit Batok)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Heartland vegetarian restaurant, mock-meat dishes.", "ru": "Вегетарианский ресторан в жилом районе, блюда из соевых аналогов мяса."}}], "fish": [{"name": "Mellben Seafood", "area": "Ang Mo Kio Ave 10", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "A Michelin Guide-listed neighbourhood favourite, best known for its crab bee hoon.", "ru": "Любимец района из гида Michelin, известен крабом с рисовой лапшой (бихун)."}}, {"name": "Uncle Leong Seafood", "area": "Punggol", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Popular crab-and-seafood chain with a branch in Punggol.", "ru": "Популярная сеть ресторанов с крабами и морепродуктами, филиал в Punggol."}}], "free": [{"name": "Chomp Chomp Food Centre", "area": "Serangoon Gardens", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "One of Singapore's most famous hawker centres, especially in the evening.", "ru": "Один из самых известных хокер-центров Сингапура, особенно вечером."}}]}, "West": {"veg": [{"name": "SunnyChoice Café", "area": "Bukit Batok Central", "tag": {"en": "Café", "ru": "Кафе"}, "desc": {"en": "Vegetarian café and grocer.", "ru": "Вегетарианское кафе и магазин."}}, {"name": "Nature Vegetarian Delights", "area": "Bukit Batok", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Heartland vegetarian restaurant, mock-meat dishes.", "ru": "Вегетарианский ресторан в жилом районе, блюда из соевых аналогов мяса."}}], "fish": [{"name": "TungLok Seafood", "area": "511 Upper Jurong Road, Jurong West", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Long-running seafood restaurant on Upper Jurong Road.", "ru": "Давно работающий ресторан морепродуктов на Upper Jurong Road."}}, {"name": "81 Restaurant", "area": "Jurong West Street 42", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Well-rated neighbourhood seafood spot in Jurong West.", "ru": "Хорошо оцениваемый районный ресторан морепродуктов в Jurong West."}}], "free": [{"name": "Taman Jurong Market & Food Centre", "area": "Yung Sheng Road, Jurong West", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "A long-standing neighbourhood hawker centre in Jurong West.", "ru": "Давно работающий районный хокер-центр в Jurong West."}}]}};
+const VENUES = {"Central": {"veg": [{"name": "Whole Earth", "area": "Peck Seah Street, Tanjong Pagar (Outram)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Peranakan & Thai vegetarian, plant-based throughout the menu.", "ru": "Перанаканская и тайская вегетарианская кухня, всё меню растительное."}}, {"name": "Annalakshmi", "area": "Shenton Way (Downtown Core)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Indian vegetarian, donation-based; egg-free.", "ru": "Индийская вегетарианская кухня, оплата по желанию; без яиц."}}, {"name": "Komala Vilas", "area": "Serangoon Road, Little India (Rochor)", "tag": {"en": "South Indian, thali", "ru": "Южноиндийская, тали"}, "desc": {"en": "Long-running South Indian vegetarian — thalis, dosa, very affordable.", "ru": "Давно работающий южноиндийский вегетарианский ресторан — тали, доса, очень доступно."}}, {"name": "Herbivore (Fortune Centre)", "area": "Middle Road (Museum/Rochor)", "tag": {"en": "Food hall", "ru": "Фуд-холл"}, "desc": {"en": "A mall with several vegan/vegetarian stalls under one roof.", "ru": "Торговый центр с несколькими веганскими/вегетарианскими лавками под одной крышей."}}, {"name": "LingZhi Vegetarian", "area": "Liat Towers, Orchard Road (Orchard)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Chinese-style vegetarian, mock-meat dishes.", "ru": "Китайская вегетарианская кухня, блюда из соевых аналогов мяса."}}], "fish": [{"name": "Chinatown Seafood Restaurant", "area": "51 Pagoda Street, Chinatown (Outram)", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Cantonese-style seafood house in the heart of Chinatown — chilli and pepper crab.", "ru": "Ресторан кантонской кухни морепродуктов в центре Чайнатауна — крабы чили и перечные крабы."}}, {"name": "JUMBO Seafood", "area": "East Coast Seafood Centre, Bedok", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Singapore's best-known chilli-crab restaurant chain; flagship at the East Coast Seafood Centre.", "ru": "Самая известная сеть ресторанов с крабами чили в Сингапуре; флагман в East Coast Seafood Centre."}}, {"name": "Long Beach Seafood (Dempsey Hill)", "area": "Dempsey Road, Tanglin", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "The chilli-crab institution that helped invent the dish, since the 1940s-50s; Dempsey branch.", "ru": "Легендарный ресторан, стоявший у истоков крабов чили с 1940-50-х годов; филиал на Демпси-Хилл."}}, {"name": "Long Beach Seafood (East Coast)", "area": "East Coast Seafood Centre, Bedok", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "The original chilli-crab restaurant, in business since the 1940s-50s.", "ru": "Ресторан, где появились крабы чили; работает с 1940-50-х годов."}}], "free": [{"name": "Maxwell Food Centre", "area": "Kadayanallur Street, Chinatown (Outram)", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "One of Singapore's most famous hawker centres — every cuisine, right by Chinatown.", "ru": "Один из самых известных хокер-центров Сингапура — кухни на любой вкус, рядом с Чайнатауном."}}, {"name": "East Coast Lagoon Food Village", "area": "East Coast Park", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "A beachside hawker centre — satay, seafood and just about everything else.", "ru": "Хокер-центр у моря — сатай, морепродукты и почти всё остальное."}}]}, "East": {"veg": [{"name": "Vegetarian Food stall, Bedok Interchange Hawker Centre", "area": "Bedok", "tag": {"en": "Hawker stall", "ru": "Лавка на фудкорте"}, "desc": {"en": "A dedicated vegetarian stall inside the Bedok Interchange hawker centre.", "ru": "Отдельная вегетарианская лавка на фудкорте Bedok Interchange."}}, {"name": "Vegetarian stall, Tampines Mart", "area": "Tampines", "tag": {"en": "Hawker stall", "ru": "Лавка на фудкорте"}, "desc": {"en": "Vegetarian rice/noodle stall at the Tampines Mart food court.", "ru": "Вегетарианская лавка (рис/лапша) на фудкорте Tampines Mart."}}, {"name": "Saute Saranghae", "area": "Tampines 1 Mall", "tag": {"en": "Halal-certified, Korean-Japanese", "ru": "Халяль, корейско-японская"}, "desc": {"en": "Vegetarian-friendly Korean-Japanese chain; check the meat-free items.", "ru": "Сеть с корейско-японской кухней и вегетарианскими блюдами; уточняйте позиции без мяса."}}], "fish": [{"name": "Jing Long Seafood Restaurant", "area": "412 Bedok North Avenue 2", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Neighbourhood seafood restaurant in Bedok North.", "ru": "Районный ресторан морепродуктов в Bedok North."}}], "free": [{"name": "Our Tampines Hub Hawker Centre", "area": "1 Tampines Walk", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "A large, modern hawker centre inside Our Tampines Hub.", "ru": "Большой современный хокер-центр внутри Our Tampines Hub."}}]}, "North": {"veg": [{"name": "Real Food", "area": "Yishun Central 1", "tag": {"en": "Restaurant & grocer", "ru": "Ресторан и магазин"}, "desc": {"en": "Vegetarian restaurant and health-food grocer.", "ru": "Вегетарианский ресторан и магазин здорового питания."}}, {"name": "elemen", "area": "Woodlands Heights (also Paya Lebar, Marina)", "tag": {"en": "Restaurant chain", "ru": "Сеть ресторанов"}, "desc": {"en": "Chinese-style vegetarian chain; several branches around Singapore.", "ru": "Сеть китайской вегетарианской кухни; несколько филиалов по Сингапуру."}}], "fish": [{"name": "Beaulieu House", "area": "117 Beaulieu Road, Sembawang Park", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "A colonial-era house on the waterfront at Sembawang Park, now a seafood restaurant.", "ru": "Дом колониальной эпохи на набережной парка Sembawang, теперь ресторан морепродуктов."}}, {"name": "1036 Live Seafood", "area": "1036 Sembawang Road", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Neighbourhood live-seafood restaurant on Sembawang Road.", "ru": "Районный ресторан живых морепродуктов на Sembawang Road."}}], "free": [{"name": "Yishun Park Hawker Centre", "area": "Yishun Avenue 4", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "A modern, well-reviewed hawker centre in the north of the island.", "ru": "Современный, хорошо оцениваемый хокер-центр на севере острова."}}]}, "North-East": {"veg": [{"name": "33 Vegetarian Food", "area": "Ang Mo Kio", "tag": {"en": "Hawker stall", "ru": "Лавка на фудкорте"}, "desc": {"en": "Known for vegetarian “chicken” rice made from tofu skin.", "ru": "Известна вегетарианским рисом с «курицей» из тофу-плёнки."}}, {"name": "Divine Vegetarian Family Restaurant", "area": "Hougang Ave 7/8", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Neighbourhood Chinese-style vegetarian restaurant.", "ru": "Районный ресторан китайской вегетарианской кухни."}}, {"name": "Greenland Vegetarian Restaurant", "area": "Upper Serangoon Road (Serangoon)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Long-standing Chinese-style vegetarian restaurant.", "ru": "Давно работающий ресторан китайской вегетарианской кухни."}}, {"name": "Nature Vegetarian Delights", "area": "Sengkang (also Bukit Batok)", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Heartland vegetarian restaurant, mock-meat dishes.", "ru": "Вегетарианский ресторан в жилом районе, блюда из соевых аналогов мяса."}}], "fish": [{"name": "Mellben Seafood", "area": "Ang Mo Kio Ave 10", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "A Michelin Guide-listed neighbourhood favourite, best known for its crab bee hoon.", "ru": "Любимец района из гида Michelin, известен крабом с рисовой лапшой (бихун)."}}, {"name": "Uncle Leong Seafood", "area": "Punggol", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Popular crab-and-seafood chain with a branch in Punggol.", "ru": "Популярная сеть ресторанов с крабами и морепродуктами, филиал в Punggol."}}], "free": [{"name": "Chomp Chomp Food Centre", "area": "Serangoon Gardens", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "One of Singapore's most famous hawker centres, especially in the evening.", "ru": "Один из самых известных хокер-центров Сингапура, особенно вечером."}}]}, "West": {"veg": [{"name": "SunnyChoice Café", "area": "Bukit Batok Central", "tag": {"en": "Café", "ru": "Кафе"}, "desc": {"en": "Vegetarian café and grocer.", "ru": "Вегетарианское кафе и магазин."}}, {"name": "Nature Vegetarian Delights", "area": "Bukit Batok", "tag": {"en": "Restaurant", "ru": "Ресторан"}, "desc": {"en": "Heartland vegetarian restaurant, mock-meat dishes.", "ru": "Вегетарианский ресторан в жилом районе, блюда из соевых аналогов мяса."}}], "fish": [{"name": "TungLok Seafood", "area": "511 Upper Jurong Road, Jurong West", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Long-running seafood restaurant on Upper Jurong Road.", "ru": "Давно работающий ресторан морепродуктов на Upper Jurong Road."}}, {"name": "81 Restaurant", "area": "Jurong West Street 42", "tag": {"en": "Seafood restaurant", "ru": "Ресторан морепродуктов"}, "desc": {"en": "Well-rated neighbourhood seafood spot in Jurong West.", "ru": "Хорошо оцениваемый районный ресторан морепродуктов в Jurong West."}}], "free": [{"name": "Taman Jurong Market & Food Centre", "area": "Yung Sheng Road, Jurong West", "tag": {"en": "Hawker centre", "ru": "Фудкорт (хокер-центр)"}, "desc": {"en": "A long-standing neighbourhood hawker centre in Jurong West.", "ru": "Давно работающий районный хокер-центр в Jurong West."}}]}};
+
 
 /* ============================================================
    FASTING ENGINE — identical formulas to calendar.html
@@ -780,7 +839,10 @@ function shareContext(){
 /* ---- share bar: always rebuilt from the day/language/area currently on screen ---- */
 function updateShare(){
   const ctx=shareContext();
-  const wa=document.getElementById("shWhatsapp"); if(wa) wa.href="https://wa.me/?text="+encodeURIComponent(ctx.text+"\n"+ctx.url);
+  const combined=ctx.text+"\n"+ctx.url;
+  const wa=document.getElementById("shWhatsapp"); if(wa) wa.href="https://wa.me/?text="+encodeURIComponent(combined);
+  const tg=document.getElementById("shTelegram"); if(tg) tg.href="https://t.me/share/url?url="+encodeURIComponent(ctx.url)+"&text="+encodeURIComponent(ctx.text);
+  const mx=document.getElementById("shMax"); if(mx) mx.href="https://max.ru/:share?text="+encodeURIComponent(combined);
   const fb=document.getElementById("shFacebook"); if(fb) fb.href="https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(ctx.url);
   const li=document.getElementById("shLinkedin"); if(li) li.href="https://www.linkedin.com/sharing/share-offsite/?url="+encodeURIComponent(ctx.url);
 }

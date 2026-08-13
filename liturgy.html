@@ -226,6 +226,12 @@ footer a{color:var(--gold-text)}
 html[lang="zh"]{--serif:'Noto Serif SC',serif} html[lang="ta"]{--serif:'Noto Serif Tamil',serif}
 html[lang="th"]{--serif:'Noto Serif Thai',serif} html[lang="ko"]{--serif:'Noto Serif KR',serif}
 html[lang="ja"]{--serif:'Noto Serif JP',serif}
+/* ---- cross-links to the other two resource pages ---- */
+.crosslinks{background:var(--page);border-bottom:1px solid var(--hairline);padding:9px 0}
+.crosslinks .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;max-width:1080px;margin:0 auto;padding:0 16px;font:500 .82rem/1 var(--sans)}
+.crosslinks .cl-label{color:var(--ink-soft);font-size:.76rem}
+.crosslinks a{color:var(--gold-text);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px;transition:.15s}
+.crosslinks a:hover{border-bottom-color:var(--gold-text)}
 </style>
 </head>
 <body>
@@ -267,6 +273,14 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
     </div>
   </div>
 </header>
+
+<div class="crosslinks">
+  <div class="row">
+    <span class="cl-label" data-t="moreRes">More resources:</span>
+    <a href="calendar.html" data-t="clCalendar">Daily calendar →</a>
+      <a href="fasting.html" data-t="clFasting">Today's fasting →</a>
+  </div>
+</div>
 
 <section class="day">
   <div class="row">
@@ -341,6 +355,21 @@ const UI={
      footlink:"Bumalik sa website ng parokya →",
      dayHint:"Ang tono (glas) ng linggo ang nagtatakda ng prokeimenon, aleluya at bersong pangkomunyon ng muling pagkabuhay tuwing Linggo. Piliin ang tono mula sa kalendaryo ng parokya; ang tantiya sa ibaba ay gabay lamang — pakikumpirma."},
 };
+
+const CROSSLINK_UI = {
+ en:{moreRes:"More resources:",clLiturgy:"Divine Liturgy text →",clFasting:"Today's fasting →",clCalendar:"Daily calendar →"},
+ ru:{moreRes:"Другие ресурсы:",clLiturgy:"Текст Литургии →",clFasting:"Пост сегодня →",clCalendar:"Церковный календарь →"},
+ zh:{moreRes:"更多资源：",clLiturgy:"礼仪文本 →",clFasting:"今日斋期 →",clCalendar:"每日历表 →"},
+ ms:{moreRes:"Sumber lain:",clLiturgy:"Teks Liturgi Ilahi →",clFasting:"Puasa hari ini →",clCalendar:"Kalendar harian →"},
+ ta:{moreRes:"மேலும் வளங்கள்:",clLiturgy:"திருப்பலி உரை →",clFasting:"இன்றைய நோன்பு →",clCalendar:"தினசரி நாள்காட்டி →"},
+ id:{moreRes:"Sumber lain:",clLiturgy:"Teks Liturgi Ilahi →",clFasting:"Puasa hari ini →",clCalendar:"Kalender harian →"},
+ vi:{moreRes:"Tài nguyên khác:",clLiturgy:"Văn bản Phụng vụ →",clFasting:"Chay hôm nay →",clCalendar:"Lịch hằng ngày →"},
+ th:{moreRes:"แหล่งข้อมูลเพิ่มเติม:",clLiturgy:"บทพิธีศักดิ์สิทธิ์ →",clFasting:"การถือศีลอดวันนี้ →",clCalendar:"ปฏิทินประจำวัน →"},
+ ko:{moreRes:"더 많은 자료:",clLiturgy:"성찬예배 본문 →",clFasting:"오늘의 금식 →",clCalendar:"매일 달력 →"},
+ ja:{moreRes:"その他のリソース:",clLiturgy:"聖体礼儀のテキスト →",clFasting:"本日の斎 →",clCalendar:"日々の暦 →"},
+ tl:{moreRes:"Karagdagang mapagkukunan:",clLiturgy:"Teksto ng Banal na Liturhiya →",clFasting:"Pag-aayuno ngayon →",clCalendar:"Araw-araw na kalendaryo →"},
+};
+for(const l in CROSSLINK_UI){ if(UI[l]) Object.assign(UI[l], CROSSLINK_UI[l]); }
 
 /* short helper labels for roles, per language */
 const ROLE={
