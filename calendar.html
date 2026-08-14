@@ -59,7 +59,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@400;600&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Thai:wght@400;600&family=Noto+Serif+KR:wght@400;600&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@400;600&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Thai:wght@400;600&family=Noto+Serif+KR:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Sans+Arabic:wght@400;500&display=swap" rel="stylesheet">
 <style>
 html{overflow-anchor:none}
 :root{
@@ -243,6 +243,7 @@ footer a{color:var(--gold-text)}
 html[lang="zh"]{--serif:'Noto Serif SC',serif} html[lang="ta"]{--serif:'Noto Serif Tamil',serif}
 html[lang="th"]{--serif:'Noto Serif Thai',serif} html[lang="ko"]{--serif:'Noto Serif KR',serif}
 html[lang="ja"]{--serif:'Noto Serif JP',serif}
+html[lang="ar"]{--serif:'Noto Naskh Arabic',serif; --sans:'Noto Sans Arabic',sans-serif; direction:rtl;}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 :focus-visible{outline:2px solid var(--lit-deep);outline-offset:2px}
 /* ---- share bar (top-of-page call to action) ---- */
@@ -262,11 +263,21 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
 @media (max-width:640px){ .sc-head{flex-basis:100%} }
 
 /* ---- cross-links to the other two resource pages ---- */
-.crosslinks{background:var(--page);border-bottom:1px solid var(--hairline);padding:9px 0}
-.crosslinks .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;max-width:1080px;margin:0 auto;padding:0 16px;font:500 .82rem/1 var(--sans)}
-.crosslinks .cl-label{color:var(--ink-soft);font-size:.76rem}
-.crosslinks a{color:var(--gold-text);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px;transition:.15s}
-.crosslinks a:hover{border-bottom-color:var(--gold-text)}
+.crosslinks{background:var(--page);border-bottom:1px solid var(--hairline);padding:10px 0}
+.crosslinks .row{display:flex;align-items:center;gap:9px;max-width:1080px;margin:0 auto;padding:0 16px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.crosslinks .row::-webkit-scrollbar{display:none}
+.crosslinks .cl-label{color:var(--ink-soft);font:500 .76rem/1 var(--sans);white-space:nowrap;flex:0 0 auto}
+.crosslinks a{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;white-space:nowrap;
+  font:600 .8rem/1 var(--sans);color:var(--gold-text);text-decoration:none;
+  border:1px solid var(--gold);border-radius:2px;padding:7px 13px 7px 11px;background:var(--raised);transition:.15s}
+.crosslinks a svg{width:14px;height:14px;flex:0 0 auto}
+.crosslinks a:hover{background:var(--gold);color:#231d10;border-color:var(--gold)}
+@media (max-width:640px){
+  .crosslinks{padding:8px 0}
+  .crosslinks .cl-label{display:none}
+  .crosslinks a{padding:6px 12px 6px 10px;font-size:.78rem}
+}
 </style>
 </head>
 <body>
@@ -288,6 +299,13 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
         <option value="ko">한국어</option>
         <option value="ja">日本語</option>
         <option value="tl">Filipino</option>
+        <option value="es">Español</option>
+        <option value="pt">Português</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+        <option value="el">Ελληνικά</option>
+        <option value="ar">العربية</option>
+        <option value="ro">Română</option>
       </select>
       <button class="iconbtn" id="modeBtn" title="Show: both / Russian / translation" aria-label="Display mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="8" height="16" rx="1"/><rect x="13" y="4" width="8" height="16" rx="1"/></svg></button>
       <button class="iconbtn" id="searchBtn" title="Search" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
@@ -312,8 +330,8 @@ html[lang="ja"]{--serif:'Noto Serif JP',serif}
 <div class="crosslinks">
   <div class="row">
     <span class="cl-label" data-t="moreRes">More resources:</span>
-    <a href="liturgy.html" data-t="clLiturgy">Divine Liturgy text →</a>
-      <a href="fasting.html" data-t="clFasting">Today's fasting →</a>
+    <a href="liturgy.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg><span data-t="clLiturgy">Divine Liturgy text →</span></a>
+      <a href="fasting.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg><span data-t="clFasting">Today's fasting →</span></a>
   </div>
 </div>
 
@@ -465,7 +483,7 @@ const UI={
      dayHint:"Pindutin ang “Talaan ng Nilalaman” upang tumalon sa Mga Santo, Mga Pagbasa, o ayos ng pagdiriwang (Vespers / Matins / Liturhiya).",
      secSaints:"Mga Santo ng Araw", secReadings:"Mga Pagbasa sa Kasulatan", secHymns:"Troparion at Kontakion", secRubric:"Ayos ng Pagdiriwang",
      tone:"Tono", noData:"Ang petsang ito ay hindi pa lubusang nakompile. Ipinapakita ang pinakamalapit na magagamit na impormasyon; mangyaring kumpirmahin sa klero ng parokya.",
-     fastNone:"Walang ayuno",fastLight:"Araw ng pag-aayuno",fastFish:"Pinapayagan ang isda",fastStrict:"Mahigpit na ayuno",fastFree:"Linggong walang ayuno"},
+     fastNone:"Walang ayuno",fastLight:"Araw ng pag-aayuno",fastFish:"Pinapayagan ang isda",fastStrict:"Mahigpit na ayuno",fastFree:"Linggong walang ayuno"}, es:{back:"Parroquia",ttl:"Calendario Diario",ph:"Buscar en el texto de este día…",searchGo:"Buscar",dateLabel:"Fecha",todayBtn:"Hoy",foot:"Compilado a partir de las instrucciones litúrgicas diarias del Patriarcado de Moscú (bogosluzhébnye ukazániya). El texto ruso se ofrece tal como fue publicado; las traducciones se proporcionan para ayudar al clero y a los lectores que no hablan ruso a seguir el oficio. En caso de cualquier discrepancia, prevalecen la fuente rusa y el clero parroquial.",footlink:"Volver al sitio de la parroquia →",dayHint:"Toque «Contenidos» para ir directamente a los Santos, las Lecturas o la rúbrica del oficio (Vísperas / Maitines / Liturgia). El tono, la nota de ayuno y la rúbrica técnica completa se compilan a partir de las instrucciones diarias de azbyka.ru.",secSaints:"Santos y Conmemoraciones",secReadings:"Lecturas de la Escritura",secHymns:"Troparios y Kontakia",secRubric:"Orden del Oficio",tone:"Tono",noData:"Esta fecha aún no se ha compilado por completo. Se muestra la información más cercana disponible; confirme los detalles del oficio con el clero parroquial.",fastNone:"Sin ayuno",fastLight:"Día de ayuno",fastFish:"Se permite pescado",fastStrict:"Ayuno estricto",fastFree:"Sin ayuno"}, pt:{back:"Paróquia",ttl:"Calendário Diário",ph:"Pesquisar o texto deste dia…",searchGo:"Pesquisar",dateLabel:"Data",todayBtn:"Hoje",foot:"Compilado a partir das instruções litúrgicas diárias do Patriarcado de Moscou (bogosluzhebnye ukazaniya). O texto russo é apresentado tal como publicado; as traduções são fornecidas para ajudar o clero e os leitores que não falam russo a acompanhar. Em caso de qualquer divergência, prevalecem a fonte russa e o clero paroquial.",footlink:"Voltar ao site da paróquia →",dayHint:"Toque em “Conteúdo” para ir direto aos Santos, às Leituras ou à rubrica litúrgica (Vésperas / Matinas / Liturgia). O tom, a nota de jejum e a rubrica técnica completa são compilados a partir das instruções diárias do azbyka.ru.",secSaints:"Santos e Comemorações",secReadings:"Leituras das Escrituras",secHymns:"Tropários e Kontákia",secRubric:"Ordem da Celebração",tone:"Tom",noData:"Esta data ainda não foi compilada por completo. Está sendo exibida a informação disponível mais próxima; por favor, confirme os detalhes da celebração com o clero paroquial.",fastNone:"Sem jejum",fastLight:"Dia de jejum",fastFish:"Peixe permitido",fastStrict:"Jejum estrito",fastFree:"Sem jejum"}, fr:{back:"Paroisse",ttl:"Calendrier quotidien",ph:"Rechercher dans le texte du jour…",searchGo:"Rechercher",dateLabel:"Date",todayBtn:"Aujourd'hui",foot:"Composé d'après les instructions liturgiques quotidiennes du Patriarcat de Moscou (bogosloujebnye oukazania). Le texte russe est donné tel que publié ; les traductions sont fournies pour aider le clergé et les lecteurs non russophones à suivre. En cas de divergence, le texte source russe et le clergé paroissial font autorité.",footlink:"Retourner au site de la paroisse →",dayHint:"Touchez « Sommaire » pour accéder aux Saints, aux Lectures, ou à la rubrique de l'office (Vêpres / Matines / Liturgie). Le ton, la note de jeûne et la rubrique technique complète sont composés d'après les instructions quotidiennes d'azbyka.ru.",secSaints:"Saints et commémorations",secReadings:"Lectures des Écritures",secHymns:"Tropaires et kondakions",secRubric:"Déroulement de l'office",tone:"Ton",noData:"Cette date n'a pas encore été entièrement compilée. Les informations disponibles les plus proches sont affichées ; veuillez confirmer les détails de l'office auprès du clergé paroissial.",fastNone:"Pas de jeûne",fastLight:"Jour de jeûne",fastFish:"Poisson autorisé",fastStrict:"Jeûne strict",fastFree:"Sans jeûne"}, de:{back:"Gemeinde",ttl:"Tageskalender",ph:"Text dieses Tages durchsuchen…",searchGo:"Suche",dateLabel:"Datum",todayBtn:"Heute",foot:"Zusammengestellt nach den täglichen liturgischen Anweisungen des Moskauer Patriarchats (bogosluzhebnye ukazaniya). Der russische Text wird wie veröffentlicht wiedergegeben; Übersetzungen werden bereitgestellt, um nicht russischsprachigen Klerikern und Lesern das Mitverfolgen zu erleichtern. Bei Abweichungen sind die russische Quelle und der Klerus der Gemeinde maßgeblich.",footlink:"Zurück zur Gemeinde-Website →",dayHint:"Tippen Sie auf „Inhalt“, um zu Heiligen, Lesungen oder der Gottesdienstordnung (Vesper / Matutin / Liturgie) zu springen. Der Ton, der Fastenhinweis und die vollständige technische Rubrik sind aus den täglichen Anweisungen von azbyka.ru zusammengestellt.",secSaints:"Heilige & Gedenktage",secReadings:"Schriftlesungen",secHymns:"Troparien & Kontakien",secRubric:"Ordnung des Gottesdienstes",tone:"Ton",noData:"Für dieses Datum liegen noch nicht alle Angaben vollständig vor. Es werden die nächstliegenden verfügbaren Informationen angezeigt; bitte bestätigen Sie die Einzelheiten zum Gottesdienst beim Klerus der Gemeinde.",fastNone:"Kein Fasten",fastLight:"Fastentag",fastFish:"Fisch erlaubt",fastStrict:"Strenges Fasten",fastFree:"Fastenfrei"}, el:{back:"Ενορία",ttl:"Ημερήσιο Ημερολόγιο",ph:"Αναζήτηση στο κείμενο αυτής της ημέρας…",searchGo:"Αναζήτηση",dateLabel:"Ημερομηνία",todayBtn:"Σήμερα",foot:"Συντάχθηκε βάσει των ημερήσιων λειτουργικών οδηγιών του Πατριαρχείου Μόσχας (bogosluzhebnye ukazaniya). Το ρωσικό κείμενο παρατίθεται όπως δημοσιεύεται· οι μεταφράσεις παρέχονται για να βοηθήσουν τον κλήρο και τους αναγνώστες που δεν γνωρίζουν ρωσικά να παρακολουθούν. Σε περίπτωση ασυμφωνίας, υπερισχύουν η ρωσική πηγή και ο κλήρος της ενορίας.",footlink:"Επιστροφή στον ιστότοπο της ενορίας →",dayHint:"Πατήστε «Περιεχόμενα» για να μεταβείτε στους Αγίους, τα Αναγνώσματα ή το τυπικό της ακολουθίας (Εσπερινός / Όρθρος / Λειτουργία). Ο ήχος, η σημείωση νηστείας και το πλήρες τεχνικό τυπικό συντάσσονται από τις ημερήσιες οδηγίες του azbyka.ru.",secSaints:"Άγιοι & Μνήμες",secReadings:"Αναγνώσματα Αγίας Γραφής",secHymns:"Τροπάρια & Κοντάκια",secRubric:"Τάξη της Ακολουθίας",tone:"Ήχος",noData:"Αυτή η ημερομηνία δεν έχει ακόμη συνταχθεί πλήρως. Εμφανίζονται οι πλησιέστερες διαθέσιμες πληροφορίες· παρακαλούμε επιβεβαιώστε τις λεπτομέρειες της ακολουθίας με τον κλήρο της ενορίας.",fastNone:"Χωρίς νηστεία",fastLight:"Ημέρα νηστείας",fastFish:"Επιτρέπεται το ψάρι",fastStrict:"Αυστηρή νηστεία",fastFree:"Κατάλυση"}, ar:{back:"الرعية",ttl:"التقويم اليومي",ph:"ابحث في نص هذا اليوم…",searchGo:"بحث",dateLabel:"التاريخ",todayBtn:"اليوم",foot:"مُجمَّع من التعليمات الطقسية اليومية لبطريركية موسكو (bogosluzhebnye ukazaniya). يُعرض النص الروسي كما نُشر؛ وتُقدَّم الترجمات لمساعدة الإكليروس والقراء غير الناطقين بالروسية على المتابعة. وفي حال وجود أي تباين، يكون المرجع هو النص الروسي وكهنة الرعية.",footlink:"العودة إلى موقع الرعية ←",dayHint:"اضغط على «المحتويات» للانتقال إلى القديسين، أو القراءات، أو ترتيب الخدمة (الغروب / السحر / القداس الإلهي). ويُجمَع اللحن وملاحظة الصوم والترتيب التقني الكامل من التعليمات اليومية لموقع azbyka.ru.",secSaints:"القديسون والتذكارات",secReadings:"القراءات الكتابية",secHymns:"الطروباريات والقنداقات",secRubric:"ترتيب الخدمة",tone:"اللحن",noData:"لم يُجمَّع هذا التاريخ بالكامل بعد. تُعرض أقرب المعلومات المتاحة؛ يُرجى تأكيد تفاصيل الخدمة مع كهنة الرعية.",fastNone:"بلا صوم",fastLight:"يوم صوم",fastFish:"السمك مسموح",fastStrict:"صوم صارم",fastFree:"فطر"}, ro:{back:"Parohie",ttl:"Calendar zilnic",ph:"Căutați textul zilei…",searchGo:"Căutare",dateLabel:"Dată",todayBtn:"Astăzi",foot:"Alcătuit din îndrumările liturgice zilnice ale Patriarhiei Moscovei (bogosluzhebnye ukazaniya). Textul rus este redat așa cum a fost publicat; traducerile sunt oferite pentru a-i ajuta pe clericii și cititorii care nu vorbesc limba rusă să urmărească slujba. În caz de neconcordanță, sursa rusă și preoții parohiei au ultimul cuvânt.",footlink:"Înapoi la site-ul parohiei →",dayHint:"Atingeți „Cuprins” pentru a sări la Sfinți, Pericope sau rânduiala slujbei (Vecernie / Utrenie / Liturghie). Glasul, nota de post și rânduiala tehnică completă sunt alcătuite din îndrumările zilnice de pe azbyka.ru.",secSaints:"Sfinți și pomeniri",secReadings:"Pericope scripturistice",secHymns:"Tropare și condace",secRubric:"Rânduiala slujbei",tone:"Glas",noData:"Această dată nu a fost încă alcătuită integral. Se afișează cele mai apropiate informații disponibile; vă rugăm să confirmați detaliile slujbei cu preoții parohiei.",fastNone:"Fără post",fastLight:"Zi de post",fastFish:"Pește permis",fastStrict:"Post aspru",fastFree:"Fără post"}
 };
 
 const SHARE_UI = {
@@ -479,7 +497,7 @@ const SHARE_UI = {
  th:{shareLabel:"แชร์ข้อมูลของวันนี้ — ลิงก์จะเปิดตรงไปยังวันนี้",shareCopied:"คัดลอกลิงก์แล้ว — วางลงใน Instagram หรือ TikTok"},
  ko:{shareLabel:"오늘의 내용 공유 — 링크가 바로 이 날짜로 열립니다.",shareCopied:"링크가 복사되었습니다 — Instagram이나 TikTok에 붙여넣으세요."},
  ja:{shareLabel:"本日の内容を共有 — リンクはこの日にそのまま開きます。",shareCopied:"リンクをコピーしました — InstagramやTikTokに貼り付けてください。"},
- tl:{shareLabel:"Ibahagi ang ngayong araw — direktang bubuksan ng link ang araw na ito.",shareCopied:"Nakopya ang link — i-paste sa Instagram o TikTok."},
+ tl:{shareLabel:"Ibahagi ang ngayong araw — direktang bubuksan ng link ang araw na ito.",shareCopied:"Nakopya ang link — i-paste sa Instagram o TikTok."}, es:{shareLabel:"Comparta la entrada de hoy — el enlace se abre directamente en este día.",shareCopied:"Enlace copiado — péguelo en Instagram o TikTok."}, pt:{shareLabel:"Compartilhe a entrada de hoje — o link abre diretamente neste dia.",shareCopied:"Link copiado — cole-o no Instagram ou no TikTok."}, fr:{shareLabel:"Partagez l'entrée du jour — le lien ouvre directement sur ce jour.",shareCopied:"Lien copié — collez-le dans Instagram ou TikTok."}, de:{shareLabel:"Teilen Sie den heutigen Eintrag — der Link öffnet direkt diesen Tag.",shareCopied:"Link kopiert — fügen Sie ihn in Instagram oder TikTok ein."}, el:{shareLabel:"Μοιραστείτε τη σημερινή εγγραφή — ο σύνδεσμος ανοίγει απευθείας σε αυτή την ημέρα.",shareCopied:"Ο σύνδεσμος αντιγράφηκε — επικολλήστε τον στο Instagram ή στο TikTok."}, ar:{shareLabel:"شارك مدخل اليوم — يفتح الرابط مباشرة على هذا اليوم.",shareCopied:"تم نسخ الرابط — الصقه في إنستغرام أو تيك توك."}, ro:{shareLabel:"Distribuiți intrarea de azi — linkul deschide direct această zi.",shareCopied:"Link copiat — inserați-l pe Instagram sau TikTok."}
 };
 for(const l in SHARE_UI){ if(UI[l]) Object.assign(UI[l], SHARE_UI[l]); }
 
@@ -494,7 +512,7 @@ const SHARE_CTA_UI = {
  th:{shareCtaTitle:"แชร์ปฏิทินวันนี้กับชุมชนของคุณ",shareCtaSub:"แตะเดียว — ทุกคนสามารถดูนักบุญและบทอ่านของวันนี้ และตรวจสอบได้ด้วยตนเอง"},
  ko:{shareCtaTitle:"오늘의 달력을 공동체와 공유하세요",shareCtaSub:"한 번의 터치로 — 모두가 오늘의 성인과 읽기를 보고 직접 확인할 수 있습니다."},
  ja:{shareCtaTitle:"本日の暦を共同体と共有しましょう",shareCtaSub:"ワンタップで — 誰もが本日の聖人と聖書朗読を見て、自分で確認できます。"},
- tl:{shareCtaTitle:"Ibahagi ang kalendaryo ngayon sa inyong komunidad",shareCtaSub:"Isang tap lamang — makikita ng lahat ang mga santo at pagbasa ngayon, at mabeberify nila mismo."},
+ tl:{shareCtaTitle:"Ibahagi ang kalendaryo ngayon sa inyong komunidad",shareCtaSub:"Isang tap lamang — makikita ng lahat ang mga santo at pagbasa ngayon, at mabeberify nila mismo."}, es:{shareCtaTitle:"Comparta el calendario de hoy con su comunidad",shareCtaSub:"Un solo toque — cualquiera puede ver los santos y las lecturas de hoy y comprobarlo por sí mismo."}, pt:{shareCtaTitle:"Compartilhe o calendário de hoje com a sua comunidade",shareCtaSub:"Um toque — qualquer pessoa pode ver os santos e as leituras de hoje e conferi-los por si mesma."}, fr:{shareCtaTitle:"Partagez le calendrier du jour avec votre communauté",shareCtaSub:"Un seul geste — chacun peut voir les saints et les lectures du jour et les vérifier par lui-même."}, de:{shareCtaTitle:"Teilen Sie den heutigen Kalender mit Ihrer Gemeinschaft",shareCtaSub:"Ein Fingertipp — jeder kann die heutigen Heiligen und Lesungen sehen und selbst nachprüfen."}, el:{shareCtaTitle:"Μοιραστείτε το σημερινό ημερολόγιο με την κοινότητά σας",shareCtaSub:"Ένα άγγιγμα — όλοι μπορούν να δουν τους σημερινούς αγίους και τα αναγνώσματα και να τα επαληθεύσουν οι ίδιοι."}, ar:{shareCtaTitle:"شارك تقويم اليوم مع جماعتك",shareCtaSub:"بلمسة واحدة — يمكن للجميع رؤية قديسي اليوم وقراءاته، والتحقق منها بأنفسهم."}, ro:{shareCtaTitle:"Distribuiți calendarul de azi comunității dumneavoastră",shareCtaSub:"O atingere — toată lumea poate vedea sfinții și pericopele de azi și le poate verifica singură."}
 };
 for(const l in SHARE_CTA_UI){ if(UI[l]) Object.assign(UI[l], SHARE_CTA_UI[l]); }
 
@@ -509,7 +527,7 @@ const CROSSLINK_UI = {
  th:{moreRes:"แหล่งข้อมูลเพิ่มเติม:",clLiturgy:"บทพิธีศักดิ์สิทธิ์ →",clFasting:"การถือศีลอดวันนี้ →",clCalendar:"ปฏิทินประจำวัน →"},
  ko:{moreRes:"더 많은 자료:",clLiturgy:"성찬예배 본문 →",clFasting:"오늘의 금식 →",clCalendar:"매일 달력 →"},
  ja:{moreRes:"その他のリソース:",clLiturgy:"聖体礼儀のテキスト →",clFasting:"本日の斎 →",clCalendar:"日々の暦 →"},
- tl:{moreRes:"Karagdagang mapagkukunan:",clLiturgy:"Teksto ng Banal na Liturhiya →",clFasting:"Pag-aayuno ngayon →",clCalendar:"Araw-araw na kalendaryo →"},
+ tl:{moreRes:"Karagdagang mapagkukunan:",clLiturgy:"Teksto ng Banal na Liturhiya →",clFasting:"Pag-aayuno ngayon →",clCalendar:"Araw-araw na kalendaryo →"}, es:{moreRes:"Más recursos:",clLiturgy:"Texto de la Divina Liturgia →",clFasting:"Ayuno de hoy →",clCalendar:"Calendario diario →"}, pt:{moreRes:"Mais recursos:",clLiturgy:"Texto da Divina Liturgia →",clFasting:"Jejum de hoje →",clCalendar:"Calendário diário →"}, fr:{moreRes:"Autres ressources :",clLiturgy:"Texte de la Divine Liturgie →",clFasting:"Jeûne du jour →",clCalendar:"Calendrier quotidien →"}, de:{moreRes:"Weitere Ressourcen:",clLiturgy:"Text der Göttlichen Liturgie →",clFasting:"Heutiges Fasten →",clCalendar:"Tageskalender →"}, el:{moreRes:"Περισσότερες πηγές:",clLiturgy:"Κείμενο της Θείας Λειτουργίας →",clFasting:"Η σημερινή νηστεία →",clCalendar:"Ημερήσιο ημερολόγιο →"}, ar:{moreRes:"مصادر إضافية:",clLiturgy:"نص القداس الإلهي ←",clFasting:"صوم اليوم ←",clCalendar:"التقويم اليومي ←"}, ro:{moreRes:"Mai multe resurse:",clLiturgy:"Textul Sfintei Liturghii →",clFasting:"Postul de azi →",clCalendar:"Calendar zilnic →"}
 };
 for(const l in CROSSLINK_UI){ if(UI[l]) Object.assign(UI[l], CROSSLINK_UI[l]); }
 
