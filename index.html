@@ -123,6 +123,9 @@
   --gold:#BFA279; --gold-text:#7A5C28;
   /* rotating liturgical accent — BLUE, the Dormition (patronal). Set once. */
   --lit-deep:#2E5C8A; --lit-mid:#7C9CC4; --lit-wash:#E1E3E5;
+  /* fasting accent (matches calendar.html/fasting.html's --fast-light), lightened for use on
+     the dark hero photo band the same way --lit-mid lightens --lit-deep for that surface */
+  --fast-mid:#8FBFA0;
   /* type */
   --serif:'EB Garamond',Georgia,serif;
   --sans:'Inter',system-ui,-apple-system,sans-serif;
@@ -201,9 +204,12 @@ strong{font-weight:600}
 .hero .sub{font-size:1.24rem;line-height:1.55;color:#E3DACB;max-width:46ch;margin-top:22px}
 .hero .ru-name{font:400 1rem/1.5 var(--sans);color:var(--gold);letter-spacing:.02em;margin-bottom:26px}
 .hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:38px}
-.hero .reflinks{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:20px}
-.hero .reflinks a{font:500 .87rem/1 var(--sans);color:#D9CDBA;text-decoration:none;border-bottom:1px solid rgba(191,162,121,.45);padding-bottom:2px;transition:.15s;white-space:nowrap}
-.hero .reflinks a:hover{color:var(--gold);border-bottom-color:var(--gold)}
+.hero .reflinks{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.hero .reflinks .btn{--rl:#EFE7DA;--rl-b:#5a5148;
+  font-size:.87rem;padding:11px 18px;border-color:var(--rl-b);color:var(--rl);background:transparent}
+.hero .reflinks .btn:hover{border-color:var(--rl);color:#fff}
+.hero .reflinks .rl-calendar{--rl:var(--lit-mid);--rl-b:rgba(124,156,196,.55)}
+.hero .reflinks .rl-fasting{--rl:var(--fast-mid);--rl-b:rgba(143,191,160,.55)}
 .btn{display:inline-flex;align-items:center;gap:9px;font:500 .96rem/1 var(--sans);
   padding:14px 22px;border-radius:2px;text-decoration:none;cursor:pointer;border:1px solid transparent;transition:.15s}
 .btn-gold{background:var(--gold);color:#231d10}
@@ -254,8 +260,13 @@ strong{font-weight:600}
 .sch-live i{width:7px;height:7px;border-radius:50%;background:#4E8A63;display:inline-block;
   animation:sch-pulse 1.8s ease-in-out infinite}
 @keyframes sch-pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.cal-embed{margin-top:14px;border:1px solid var(--gold);background:var(--raised);padding:8px}
-.cal-embed iframe{display:block;width:100%;height:640px;border:0;background:#fff}
+.cal-embed{margin-top:14px;border:1px solid var(--hairline);border-radius:14px;background:var(--raised);
+  padding:10px;overflow:hidden;box-shadow:0 14px 46px rgba(20,17,14,.10)}
+.embed-tag{display:flex;align-items:center;gap:7px;font:600 .72rem/1 var(--sans);letter-spacing:.03em;
+  color:var(--gold-text);margin:2px 4px 9px}
+.embed-tag::before{content:"";width:7px;height:7px;border-radius:50%;background:#4E8A63;flex:none;
+  animation:sch-pulse 1.8s ease-in-out infinite}
+.cal-embed iframe{display:block;width:100%;height:640px;border:0;border-radius:8px;background:#fff}
 @media (max-width:620px){.cal-add{margin-left:0}.cal-bar{gap:10px}}
 
 /* ---- draws (why come) grid ---- */
@@ -357,6 +368,8 @@ footer a{color:var(--gold)}
   .hero .sub{font-size:1.06rem;margin-top:16px}
   .hero .cta{gap:10px;margin-top:26px;flex-direction:column;align-items:stretch}
   .hero .cta .btn{justify-content:center;width:100%}
+  .hero .reflinks{gap:10px;flex-direction:column;align-items:stretch}
+  .hero .reflinks .btn{justify-content:center;width:100%}
   /* early give band */
   .give .row{padding:18px 0}
   .give .act{width:100%;justify-content:center}
@@ -553,7 +566,10 @@ footer a{color:var(--gold)}
 .social-head{display:flex;align-items:center;gap:9px;font:600 .76rem/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-text);margin-bottom:13px}
 .social-head svg{width:17px;height:17px}
 .social-panel{border:1px solid var(--hairline);border-radius:14px;overflow:hidden;background:var(--raised);box-shadow:0 14px 46px rgba(20,17,14,.10)}
-.fb-embed iframe{display:block;width:100%;height:560px;border:0;background:var(--raised)}
+.fb-embed iframe{display:block;width:100%;height:480px;border:0;background:var(--raised)}
+.fb-foot{display:flex;align-items:center;justify-content:center;padding:15px;font:600 .88rem/1 var(--sans);
+  color:var(--gold-text);text-decoration:none;border-top:1px solid var(--hairline)}
+.fb-foot:hover{background:var(--page)}
 .ig-panel{display:flex;flex-direction:column;text-decoration:none;color:var(--ink)}
 .ig-bar{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--hairline)}
 .ig-bar .ig-glyph{width:32px;height:32px;flex:none;color:#fff;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);border-radius:10px;padding:6px;box-sizing:border-box}
@@ -567,7 +583,7 @@ footer a{color:var(--gold)}
 @media(max-width:760px){
   #social{padding:52px 0}
   .social-grid{grid-template-columns:1fr;gap:24px;max-width:460px}
-  .fb-embed iframe{height:500px}
+  .fb-embed iframe{height:440px}
 }
 </style>
 <style id="bg-photos">:root{
@@ -635,9 +651,9 @@ footer a{color:var(--gold)}
       <a class="btn btn-ghost" href="#visit" data-k="heroCta2">Как прийти</a>
     </div>
     <div class="reflinks">
-      <a href="liturgy.html" data-k="heroLiturgy">Текст литургии</a>
-      <a href="calendar.html" data-k="heroCal">Церковный календарь</a>
-      <a href="fasting.html" data-k="heroFast">Пост сегодня</a>
+      <a class="btn btn-ghost" href="liturgy.html" data-k="heroLiturgy">Текст литургии</a>
+      <a class="btn btn-ghost rl-calendar" href="calendar.html" data-k="heroCal">Церковный календарь</a>
+      <a class="btn btn-ghost rl-fasting" href="fasting.html" data-k="heroFast">Пост сегодня</a>
     </div>
     <p class="quiet" data-k="heroQuiet">Приход Успения Пресвятой Богородицы — кафедральный приход Сингапурской епархии и центр Патриаршего экзархата Юго-Восточной Азии.</p>
   </div>
@@ -681,10 +697,17 @@ footer a{color:var(--gold)}
 
       <div id="schList" class="schedule-live" aria-live="polite"></div>
 
-      <!-- fallback: shown only if the styled render has no data for the shown week -->
+      <!-- fallback: shown only if the styled render has no data for the shown week.
+           Google renders this iframe's contents on its own origin, so its internal
+           chrome (fonts, grid lines, event colour) cannot be reached with CSS from this
+           page -- that is a browser security boundary, not a styling gap. What CAN be
+           tuned is what Google's own embed API exposes via URL params (bgcolor here, to
+           stop the canvas being stark white against our cream page) and the frame we
+           build around it, which we style like every other card on the site. -->
       <div class="cal-embed" id="calEmbedWrap" hidden>
+        <p class="embed-tag" data-k="calEmbedTag">Live — straight from our parish Google Calendar</p>
         <iframe id="calFrame" title="Schedule — Holy Dormition SG" loading="lazy"
-          src="https://calendar.google.com/calendar/embed?src=9ac614da0e25ad487c562b5686fd4bff92a30786e7c9cb7036012528555a2315%40group.calendar.google.com&ctz=Asia%2FSingapore&mode=WEEK&showTitle=0&showPrint=0&showCalendars=0&showTz=0&hl=en"></iframe>
+          src="https://calendar.google.com/calendar/embed?src=9ac614da0e25ad487c562b5686fd4bff92a30786e7c9cb7036012528555a2315%40group.calendar.google.com&ctz=Asia%2FSingapore&mode=WEEK&showTitle=0&showPrint=0&showCalendars=0&showTz=0&hl=en&bgcolor=%23FDFBF7"></iframe>
       </div>
 
       <div class="legend" aria-hidden="true" style="margin-top:20px">
@@ -711,8 +734,15 @@ footer a{color:var(--gold)}
     <div class="social-grid">
       <div class="social-col">
         <div class="social-head"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg> Facebook</div>
+        <!-- Facebook renders this iframe's contents on facebook.com, so its inner chrome
+             (blue Like button, post text styling) can't be reached with CSS from this page --
+             a browser security boundary every site embedding a Page Plugin runs into, not a
+             styling gap. What we control: stripping as much of Facebook's own header/cover/
+             facepile UI as their plugin params allow, so what's left is mostly just the photo
+             feed, inside a card frame that matches ours. -->
         <div class="social-panel fb-embed">
-          <iframe title="Facebook — Russian Orthodox Church in Singapore" src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FRussianOrthodoxChurchSG%2F&tabs=timeline&width=420&height=540&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true" width="420" height="540" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" loading="lazy"></iframe>
+          <iframe title="Facebook — Russian Orthodox Church in Singapore" src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FRussianOrthodoxChurchSG%2F&tabs=timeline&width=420&height=480&small_header=true&adapt_container_width=true&hide_cover=true&show_facepile=false" width="420" height="480" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" loading="lazy"></iframe>
+          <a class="fb-foot" href="https://www.facebook.com/RussianOrthodoxChurchSG/" target="_blank" rel="noopener" data-k="socFbCta">See more on Facebook →</a>
         </div>
       </div>
       <div class="social-col">
@@ -1002,6 +1032,7 @@ const I18N = {
   brandRu:"Dormisi Bunda Allah",
   calAdd:"Pertanyaan tentang jadwal? WhatsApp +65 6462 2448",
   calAddBtn:"Tambahkan ke Google Calendar",
+  calEmbedTag:"Langsung — dari kalender Google paroki kami",
   calEmpty:"Tidak ada ibadah yang tercatat untuk minggu ini. Lihat kalender paroki, atau tanyakan melalui WhatsApp.",
   calNote:"<strong>Warna titik adalah warna busana liturgi hari itu.</strong> Dalam Gereja Ortodoks, busana dan hiasan gereja berubah menurut perayaan — emas pada hari biasa, biru untuk Bunda Allah, merah pada Paskah. Di Singapura yang tak berganti musim, inilah satu-satunya kalender alam yang dijaga paroki.",
   cat_communion:"Sebelum Komuni",
@@ -1131,6 +1162,7 @@ const I18N = {
   brandRu:"Đức Mẹ An Giấc",
   calAdd:"Thắc mắc về lịch lễ? WhatsApp +65 6462 2448",
   calAddBtn:"Thêm vào Google Calendar",
+  calEmbedTag:"Trực tiếp — từ lịch Google của giáo xứ chúng tôi",
   calEmpty:"Không có buổi lễ nào được ghi cho tuần này. Xin xem lịch giáo xứ hoặc hỏi qua WhatsApp.",
   calNote:"<strong>Màu của mỗi chấm là màu phẩm phục của ngày hôm đó.</strong> Trong Giáo hội Chính thống, phẩm phục và trang hoàng nhà thờ thay đổi theo ngày lễ — vàng vào ngày thường, xanh cho Đức Mẹ, đỏ vào lễ Phục Sinh. Ở Singapore không có bốn mùa, đây là cuốn lịch thiên nhiên duy nhất mà giáo xứ gìn giữ.",
   cat_communion:"Trước khi Rước Lễ",
@@ -1260,6 +1292,7 @@ const I18N = {
   brandRu:"การหลับใหลของพระมารดาพระเจ้า",
   calAdd:"มีคำถามเรื่องตารางพิธี? WhatsApp +65 6462 2448",
   calAddBtn:"เพิ่มลงใน Google ปฏิทิน",
+  calEmbedTag:"สด — ตรงจากปฏิทิน Google ของวัดเรา",
   calEmpty:"ไม่มีพิธีที่บันทึกไว้สำหรับสัปดาห์นี้ โปรดดูปฏิทินของวัด หรือสอบถามทาง WhatsApp",
   calNote:"<strong>สีของแต่ละจุดคือสีอาภรณ์พิธีของวันนั้น</strong> ในคริสตจักรออร์ทอดอกซ์ อาภรณ์และการประดับวัดจะเปลี่ยนไปตามวันฉลอง — สีทองในวันธรรมดา สีน้ำเงินสำหรับพระมารดาพระเจ้า สีแดงในเทศกาลปัสกา ในสิงคโปร์ซึ่งไม่มีฤดูกาล นี่คือปฏิทินธรรมชาติเพียงหนึ่งเดียวที่วัดยึดถือ",
   cat_communion:"ก่อนรับศีลมหาสนิท",
@@ -1389,6 +1422,7 @@ const I18N = {
   brandRu:"성모 안식",
   calAdd:"예배 일정 문의? WhatsApp +65 6462 2448",
   calAddBtn:"Google 캘린더에 추가",
+  calEmbedTag:"실시간 — 본당 구글 캘린더에서 직접",
   calEmpty:"이번 주에 등록된 예배가 없습니다. 본당 달력을 보시거나 WhatsApp으로 문의해 주세요.",
   calNote:"<strong>각 점의 색은 그날 제의(祭衣)의 색입니다.</strong> 정교회에서는 축일에 따라 제의와 성당 장식이 바뀝니다 — 평일에는 금색, 성모께는 청색, 부활절에는 붉은색입니다. 사계절이 없는 싱가포르에서 이것은 본당이 지키는 유일한 자연의 달력입니다.",
   cat_communion:"성찬 전에",
@@ -1518,6 +1552,7 @@ const I18N = {
   brandRu:"生神女就寝",
   calAdd:"奉神礼の予定についてのお問い合わせは WhatsApp +65 6462 2448 まで",
   calAddBtn:"Google カレンダーに追加",
+  calEmbedTag:"ライブ — 教区の Google カレンダーから直接",
   calEmpty:"今週に登録された奉神礼はありません。教区の暦をご覧いただくか、WhatsApp でお尋ねください。",
   calNote:"<strong>各点の色は、その日の祭服の色です。</strong> 正教会では、祭服と聖堂の装飾が祝日ごとに変わります — 平日は金、生神女には青、復活祭には赤です。四季のないシンガポールでは、これが教区の守る唯一の自然の暦です。",
   cat_communion:"領聖の前に",
@@ -1647,6 +1682,7 @@ const I18N = {
   brandRu:"Pagkakatulog ng Ina ng Diyos",
   calAdd:"May tanong tungkol sa iskedyul? WhatsApp +65 6462 2448",
   calAddBtn:"Idagdag sa Google Calendar",
+  calEmbedTag:"Live — direkta mula sa Google Calendar ng aming parokya",
   calEmpty:"Walang nakatalang serbisyo para sa linggong ito. Tingnan ang kalendaryo ng parokya, o magtanong sa WhatsApp.",
   calNote:"<strong>Ang kulay ng bawat tuldok ay ang kulay ng bestidura sa araw na iyon.</strong> Sa Simbahang Ortodokso, nagbabago ang bestidura at palamuti ng simbahan ayon sa kapistahan — ginto sa karaniwang araw, asul para sa Ina ng Diyos, pula sa Pasko ng Pagkabuhay. Sa Singapore na walang tag-panahon, ito ang tanging kalendaryo mula sa kalikasan na iniingatan ng parokya.",
   cat_communion:"Bago ang Komunyon",
@@ -1793,6 +1829,7 @@ const I18N = {
   calLiveSub:"The current dates and times, kept in the parish calendar itself. Any change is announced in the parish WhatsApp group.",
   calThisWeek:"This week", calUpcoming:"Upcoming",
   calAddBtn:"Add to Google Calendar",
+  calEmbedTag:"Live — straight from our parish Google Calendar",
   calAdd:"Questions about the schedule? WhatsApp +65 6462 2448",
   drawsKicker:"Why people come", drawsTitle:"A faith kept whole, without simplification.",
   drawsLead:"In a city set on the future, here the ancient is preserved — not as a museum piece, but as a living link with the apostolic Church. This is what most often brings people through the door.",
@@ -1857,6 +1894,7 @@ const I18N = {
   calLiveSub:"Актуальные даты и время — из приходского календаря. Об изменениях сообщается в приходской группе в WhatsApp.",
   calThisWeek:"Текущая неделя", calUpcoming:"Предстоящие",
   calAddBtn:"Добавить в Google Календарь",
+  calEmbedTag:"Прямая трансляция — прямо из Google-календаря прихода",
   calAdd:"Вопросы по расписанию — в WhatsApp: +65 6462 2448",
   drawsKicker:"Почему приходят сюда", drawsTitle:"Вера, сохранённая без упрощений.",
   drawsLead:"В городе, устремлённом в будущее, здесь хранят древнее — не как музейную ценность, а как живую связь с апостольской Церковью. Вот что чаще всего приводит сюда людей.",
@@ -1921,6 +1959,7 @@ const I18N = {
   calLiveSub:"最新日期与时间，直接取自堂区日历。任何变动都会在堂区 WhatsApp 群组中公布。",
   calThisWeek:"本周", calUpcoming:"即将举行",
   calAddBtn:"加入 Google 日历",
+  calEmbedTag:"实时 — 直接来自堂区的 Google 日历",
   calAdd:"关于时间表的疑问，请联系 WhatsApp +65 6462 2448",
   drawsKicker:"人们为何而来", drawsTitle:"一份完整保存、未曾简化的信仰。",
   drawsLead:"在这座向往未来的城市里，这里所守护的是古老之物——不是作为博物馆的陈列，而是与使徒教会活生生的联系。这正是最常吸引人们踏入门槛的原因。",
@@ -1985,6 +2024,7 @@ const I18N = {
   calLiveSub:"Tarikh dan masa terkini, terus daripada kalendar paroki. Sebarang perubahan diumumkan dalam kumpulan WhatsApp paroki.",
   calThisWeek:"Minggu ini", calUpcoming:"Akan datang",
   calAddBtn:"Tambah ke Google Calendar",
+  calEmbedTag:"Langsung — terus daripada Kalendar Google paroki kami",
   calAdd:"Pertanyaan tentang jadual? WhatsApp +65 6462 2448",
   drawsKicker:"Mengapa orang datang", drawsTitle:"Iman yang dipelihara utuh, tanpa dipermudah.",
   drawsLead:"Di kota yang menuju masa depan, di sini yang purba dipelihara — bukan sebagai bahan muzium, tetapi sebagai hubungan hidup dengan Gereja para rasul. Inilah yang paling kerap membawa orang masuk.",
@@ -2049,6 +2089,7 @@ const I18N = {
   calLiveSub:"தற்போதைய தேதிகளும் நேரங்களும், சபையின் நாட்காட்டியிலிருந்து நேரடியாக. மாற்றங்கள் சபையின் WhatsApp குழுவில் அறிவிக்கப்படும்.",
   calThisWeek:"இந்த வாரம்", calUpcoming:"வரவிருப்பவை",
   calAddBtn:"Google Calendar-இல் சேர்",
+  calEmbedTag:"நேரலை — எங்கள் பங்கின் Google நாட்காட்டியிலிருந்து நேரடியாக",
   calAdd:"அட்டவணை பற்றிய கேள்விகள்? WhatsApp +65 6462 2448",
   drawsKicker:"மக்கள் ஏன் வருகிறார்கள்", drawsTitle:"எளிமையாக்கப்படாமல் முழுமையாய்க் காக்கப்பட்ட விசுவாசம்.",
   drawsLead:"எதிர்காலத்தை நோக்கிச் செல்லும் இந்நகரில், இங்கு பழமை காக்கப்படுகிறது — அருங்காட்சியகப் பொருளாக அல்ல, அப்போஸ்தலர் திருச்சபையுடன் ஓர் உயிருள்ள தொடர்பாக. மக்களை உள்ளே அழைத்து வருவது பெரும்பாலும் இதுவே.",
@@ -2325,7 +2366,7 @@ const LIT_LINKS = {"en": {"heroLiturgy": "Text of the Divine Liturgy", "prLiturg
 for(const l in LIT_LINKS){ if(I18N[l]) Object.assign(I18N[l], LIT_LINKS[l]); }
 const GAL_I18N = {"en": {"galKicker": "Parish life", "galTitle": "Moments from the life of the parish.", "galLead": "Feast days and ordinary Sundays, the Divine Liturgy and the community that gathers around it."}, "ru": {"galKicker": "Из жизни прихода", "galTitle": "Мгновения из жизни прихода.", "galLead": "Праздники и обычные воскресенья, Божественная литургия и собирающаяся вокруг нее община."}, "zh": {"galKicker": "堂区生活", "galTitle": "堂区生活的瞬间。", "galLead": "节日与平常的主日，神圣礼仪与围绕它聚集的团体。"}, "ms": {"galKicker": "Kehidupan paroki", "galTitle": "Detik-detik dari kehidupan paroki.", "galLead": "Hari raya dan hari Ahad biasa, Liturgi Ilahi dan komuniti yang berhimpun di sekelilingnya."}, "ta": {"galKicker": "பங்கு வாழ்க்கை", "galTitle": "பங்கு வாழ்க்கையின் தருணங்கள்.", "galLead": "பண்டிகை நாட்களும் சாதாரண ஞாயிறுகளும், தெய்வீக பூஜையும் அதைச் சுற்றி கூடும் சமூகமும்."}, "id": {"galKicker": "Kehidupan paroki", "galTitle": "Momen-momen dari kehidupan paroki.", "galLead": "Hari raya dan hari Minggu biasa, Liturgi Ilahi dan komunitas yang berkumpul di sekitarnya."}, "vi": {"galKicker": "Đời sống giáo xứ", "galTitle": "Những khoảnh khắc trong đời sống giáo xứ.", "galLead": "Những ngày lễ và các Chủ nhật thường, Phụng vụ Thánh và cộng đoàn quy tụ quanh đó."}, "th": {"galKicker": "ชีวิตของวัด", "galTitle": "ช่วงเวลาจากชีวิตของวัด", "galLead": "วันฉลองและวันอาทิตย์ธรรมดา พิธีบูชาศักดิ์สิทธิ์และชุมชนที่มารวมกันรอบพิธี"}, "ko": {"galKicker": "본당의 삶", "galTitle": "본당의 삶의 순간들.", "galLead": "축일과 평범한 주일, 성찬예배와 그 둘레에 모이는 공동체."}, "ja": {"galKicker": "教区の営み", "galTitle": "教区の営みのひとこま。", "galLead": "祝日とふだんの主日、聖体礼儀とその周りに集う共同体。"}, "tl": {"galKicker": "Buhay ng parokya", "galTitle": "Mga sandali mula sa buhay ng parokya.", "galLead": "Mga kapistahan at karaniwang Linggo, ang Banal na Liturhiya at ang komunidad na nagtitipon sa paligid nito."}};
 for(const l in GAL_I18N){ if(I18N[l]) Object.assign(I18N[l], GAL_I18N[l]); }
-const SOC_I18N = {"en": {"socKicker": "Follow us", "socTitle": "Follow the life of the parish.", "socLead": "Photographs, feasts and news on the parish's Facebook and Instagram.", "socIgSub": "Photographs from the life of the parish — services, feasts, community.", "socIgCta": "See our Instagram →"}, "ru": {"socKicker": "Мы в соцсетях", "socTitle": "Следите за жизнью прихода.", "socLead": "Фотографии, праздники и новости — в Facebook и Instagram прихода.", "socIgSub": "Фотографии из жизни прихода — богослужения, праздники, община.", "socIgCta": "Смотреть в Instagram →"}, "zh": {"socKicker": "关注我们", "socTitle": "关注堂区的生活。", "socLead": "照片、节日与新闻——在堂区的 Facebook 和 Instagram。", "socIgSub": "堂区生活的照片——礼仪、节日与团体。", "socIgCta": "查看我们的 Instagram →"}, "ms": {"socKicker": "Ikuti kami", "socTitle": "Ikuti kehidupan paroki.", "socLead": "Foto, hari raya dan berita di Facebook dan Instagram paroki.", "socIgSub": "Foto daripada kehidupan paroki — ibadah, hari raya, komuniti.", "socIgCta": "Lihat Instagram kami →"}, "ta": {"socKicker": "பின்தொடரவும்", "socTitle": "பங்கின் வாழ்க்கையைப் பின்தொடருங்கள்.", "socLead": "புகைப்படங்கள், பண்டிகைகள், செய்திகள் — பங்கின் Facebook மற்றும் Instagram-ல்.", "socIgSub": "பங்கு வாழ்க்கையின் புகைப்படங்கள் — வழிபாடு, பண்டிகைகள், சமூகம்.", "socIgCta": "எங்கள் Instagram →"}, "id": {"socKicker": "Ikuti kami", "socTitle": "Ikuti kehidupan paroki.", "socLead": "Foto, hari raya, dan berita di Facebook dan Instagram paroki.", "socIgSub": "Foto dari kehidupan paroki — ibadah, hari raya, komunitas.", "socIgCta": "Lihat Instagram kami →"}, "vi": {"socKicker": "Theo dõi chúng tôi", "socTitle": "Theo dõi đời sống giáo xứ.", "socLead": "Hình ảnh, lễ và tin tức trên Facebook và Instagram của giáo xứ.", "socIgSub": "Hình ảnh đời sống giáo xứ — phụng vụ, lễ, cộng đoàn.", "socIgCta": "Xem Instagram của chúng tôi →"}, "th": {"socKicker": "ติดตามเรา", "socTitle": "ติดตามชีวิตของวัด", "socLead": "ภาพถ่าย วันฉลอง และข่าวสารบน Facebook และ Instagram ของวัด", "socIgSub": "ภาพจากชีวิตของวัด — พิธีกรรม วันฉลอง และชุมชน", "socIgCta": "ดู Instagram ของเรา →"}, "ko": {"socKicker": "팔로우하기", "socTitle": "본당의 삶을 함께하세요.", "socLead": "본당의 페이스북과 인스타그램에서 사진·축일·소식을 만나보세요.", "socIgSub": "본당 생활의 사진 — 예배, 축일, 공동체.", "socIgCta": "인스타그램 보기 →"}, "ja": {"socKicker": "フォローする", "socTitle": "教区の日々をご覧ください。", "socLead": "写真・祝日・お知らせは教区の Facebook と Instagram で。", "socIgSub": "教区の日々の写真 — 奉神礼、祝日、共同体。", "socIgCta": "Instagram を見る →"}, "tl": {"socKicker": "Sundan kami", "socTitle": "Sundan ang buhay ng parokya.", "socLead": "Mga larawan, kapistahan at balita sa Facebook at Instagram ng parokya.", "socIgSub": "Mga larawan ng buhay-parokya — mga serbisyo, kapistahan, komunidad.", "socIgCta": "Tingnan ang aming Instagram →"}};
+const SOC_I18N = {"en": {"socKicker": "Follow us", "socTitle": "Follow the life of the parish.", "socLead": "Photographs, feasts and news on the parish's Facebook and Instagram.", "socIgSub": "Photographs from the life of the parish — services, feasts, community.", "socIgCta": "See our Instagram →", "socFbCta": "See more on Facebook →"}, "ru": {"socKicker": "Мы в соцсетях", "socTitle": "Следите за жизнью прихода.", "socLead": "Фотографии, праздники и новости — в Facebook и Instagram прихода.", "socIgSub": "Фотографии из жизни прихода — богослужения, праздники, община.", "socIgCta": "Смотреть в Instagram →", "socFbCta": "Больше в Facebook →"}, "zh": {"socKicker": "关注我们", "socTitle": "关注堂区的生活。", "socLead": "照片、节日与新闻——在堂区的 Facebook 和 Instagram。", "socIgSub": "堂区生活的照片——礼仪、节日与团体。", "socIgCta": "查看我们的 Instagram →", "socFbCta": "在 Facebook 查看更多 →"}, "ms": {"socKicker": "Ikuti kami", "socTitle": "Ikuti kehidupan paroki.", "socLead": "Foto, hari raya dan berita di Facebook dan Instagram paroki.", "socIgSub": "Foto daripada kehidupan paroki — ibadah, hari raya, komuniti.", "socIgCta": "Lihat Instagram kami →", "socFbCta": "Lihat lagi di Facebook →"}, "ta": {"socKicker": "பின்தொடரவும்", "socTitle": "பங்கின் வாழ்க்கையைப் பின்தொடருங்கள்.", "socLead": "புகைப்படங்கள், பண்டிகைகள், செய்திகள் — பங்கின் Facebook மற்றும் Instagram-ல்.", "socIgSub": "பங்கு வாழ்க்கையின் புகைப்படங்கள் — வழிபாடு, பண்டிகைகள், சமூகம்.", "socIgCta": "எங்கள் Instagram →", "socFbCta": "மேலும் Facebook-இல் →"}, "id": {"socKicker": "Ikuti kami", "socTitle": "Ikuti kehidupan paroki.", "socLead": "Foto, hari raya, dan berita di Facebook dan Instagram paroki.", "socIgSub": "Foto dari kehidupan paroki — ibadah, hari raya, komunitas.", "socIgCta": "Lihat Instagram kami →", "socFbCta": "Lihat lebih lanjut di Facebook →"}, "vi": {"socKicker": "Theo dõi chúng tôi", "socTitle": "Theo dõi đời sống giáo xứ.", "socLead": "Hình ảnh, lễ và tin tức trên Facebook và Instagram của giáo xứ.", "socIgSub": "Hình ảnh đời sống giáo xứ — phụng vụ, lễ, cộng đoàn.", "socIgCta": "Xem Instagram của chúng tôi →", "socFbCta": "Xem thêm trên Facebook →"}, "th": {"socKicker": "ติดตามเรา", "socTitle": "ติดตามชีวิตของวัด", "socLead": "ภาพถ่าย วันฉลอง และข่าวสารบน Facebook และ Instagram ของวัด", "socIgSub": "ภาพจากชีวิตของวัด — พิธีกรรม วันฉลอง และชุมชน", "socIgCta": "ดู Instagram ของเรา →", "socFbCta": "ดูเพิ่มเติมบน Facebook →"}, "ko": {"socKicker": "팔로우하기", "socTitle": "본당의 삶을 함께하세요.", "socLead": "본당의 페이스북과 인스타그램에서 사진·축일·소식을 만나보세요.", "socIgSub": "본당 생활의 사진 — 예배, 축일, 공동체.", "socIgCta": "인스타그램 보기 →", "socFbCta": "페이스북에서 더 보기 →"}, "ja": {"socKicker": "フォローする", "socTitle": "教区の日々をご覧ください。", "socLead": "写真・祝日・お知らせは教区の Facebook と Instagram で。", "socIgSub": "教区の日々の写真 — 奉神礼、祝日、共同体。", "socIgCta": "Instagram を見る →", "socFbCta": "Facebook でもっと見る →"}, "tl": {"socKicker": "Sundan kami", "socTitle": "Sundan ang buhay ng parokya.", "socLead": "Mga larawan, kapistahan at balita sa Facebook at Instagram ng parokya.", "socIgSub": "Mga larawan ng buhay-parokya — mga serbisyo, kapistahan, komunidad.", "socIgCta": "Tingnan ang aming Instagram →", "socFbCta": "Tingnan pa sa Facebook →"}};
 for(const l in SOC_I18N){ if(I18N[l]) Object.assign(I18N[l], SOC_I18N[l]); }
 const DON_UPDATE = {"en": {"donNeed": "needed each month", "donRaised": "short at the end of June", "donShort": "short as of 1 August", "donBody": "The parish has no government funding and no building of its own — it rents its premises and lives entirely on the donations of the faithful. Each month it needs about S$18,000 for rent and other expenses, and every gift helps cover that cost and build the first Orthodox church in Singapore.", "donAsOf": "As of 1 August 2026. In July, donations covered the month's costs and reduced the overall shortfall from about S$3,372 to about S$1,300. The parish receives no government support and lives on the offerings of the faithful."}, "ru": {"donNeed": "нужно каждый месяц", "donRaised": "не хватало в конце июня", "donShort": "не хватает на 1 августа", "donBody": "У прихода нет ни государственного финансирования, ни собственного здания: храм арендуется, и приход живёт только на пожертвования верующих. Каждый месяц на аренду дома и другие расходы нужно около 18 000 сингапурских долларов. Благодаря вашим пожертвованиям каждое приношение помогает покрыть эти расходы и строить первый православный храм в Сингапуре.", "donAsOf": "По состоянию на 1 августа 2026 года. В июле пожертвования покрыли расходы месяца и уменьшили общую нехватку примерно с 3 372 до около 1 300 долларов. Приход не получает государственной поддержки и существует на пожертвования верующих."}, "zh": {"donNeed": "每月所需", "donRaised": "六月底缺口", "donShort": "8月1日缺口", "donBody": "堂区没有政府资助，也没有自己的建筑——教堂是租用的，堂区完全依靠信徒的奉献维持。每月房租及其他开支约需 18,000 新元。您的每一份奉献都帮助支付这笔费用，并建造新加坡第一座正教教堂。", "donAsOf": "截至 2026 年 8 月 1 日。七月的奉献覆盖了当月开支，并将总缺口从约 3,372 新元减少到约 1,300 新元。堂区不接受政府资助，依靠信徒的奉献维持。"}, "ms": {"donNeed": "diperlukan setiap bulan", "donRaised": "kekurangan pada akhir Jun", "donShort": "kekurangan pada 1 Ogos", "donBody": "Paroki tidak menerima dana kerajaan dan tiada bangunan sendiri — ia menyewa premisnya dan hidup sepenuhnya daripada derma umat. Setiap bulan ia memerlukan kira-kira S$18,000 untuk sewa dan perbelanjaan lain, dan setiap pemberian membantu menampung kos itu serta membina gereja Ortodoks pertama di Singapura.", "donAsOf": "Sehingga 1 Ogos 2026. Pada Julai, derma menampung kos bulan itu dan mengurangkan kekurangan keseluruhan daripada kira-kira S$3,372 kepada kira-kira S$1,300. Paroki tidak menerima bantuan kerajaan dan hidup daripada derma umat."}, "ta": {"donNeed": "ஒவ்வொரு மாதமும் தேவை", "donRaised": "ஜூன் இறுதியில் பற்றாக்குறை", "donShort": "ஆகஸ்ட் 1 நிலவரப்படி பற்றாக்குறை", "donBody": "பங்குக்கு அரசு நிதியுதவி இல்லை, சொந்தக் கட்டிடமும் இல்லை — வளாகம் வாடகைக்கு எடுக்கப்படுகிறது, பங்கு முழுவதுமாக விசுவாசிகளின் காணிக்கைகளையே நம்பியுள்ளது. ஒவ்வொரு மாதமும் வாடகைக்கும் பிற செலவுகளுக்கும் சுமார் S$18,000 தேவை; உங்கள் ஒவ்வொரு கொடையும் அந்தச் செலவைச் சமாளிக்கவும், சிங்கப்பூரின் முதல் ஆர்த்தடாக்ஸ் தேவாலயத்தைக் கட்டவும் உதவுகிறது.", "donAsOf": "2026 ஆகஸ்ட் 1 நிலவரப்படி. ஜூலையில் காணிக்கைகள் அம்மாதச் செலவுகளைச் சமாளித்து, மொத்தப் பற்றாக்குறையை சுமார் S$3,372-ல் இருந்து சுமார் S$1,300 ஆகக் குறைத்தன. பங்கு அரசு உதவி பெறவில்லை; விசுவாசிகளின் காணிக்கைகளால் இயங்குகிறது."}, "id": {"donNeed": "dibutuhkan setiap bulan", "donRaised": "kekurangan pada akhir Juni", "donShort": "kekurangan per 1 Agustus", "donBody": "Paroki tidak menerima dana pemerintah dan tidak memiliki gedung sendiri — ia menyewa tempatnya dan hidup sepenuhnya dari sumbangan umat. Setiap bulan dibutuhkan sekitar S$18.000 untuk sewa dan pengeluaran lain, dan setiap pemberian membantu menutup biaya itu serta membangun gereja Ortodoks pertama di Singapura.", "donAsOf": "Per 1 Agustus 2026. Pada Juli, sumbangan menutup biaya bulan itu dan mengurangi kekurangan keseluruhan dari sekitar S$3.372 menjadi sekitar S$1.300. Paroki tidak menerima bantuan pemerintah dan hidup dari sumbangan umat."}, "vi": {"donNeed": "cần mỗi tháng", "donRaised": "thiếu vào cuối tháng 6", "donShort": "thiếu tính đến 1 tháng 8", "donBody": "Giáo xứ không có tài trợ của chính phủ và không có tòa nhà riêng — giáo xứ thuê cơ sở và sống hoàn toàn nhờ sự dâng cúng của tín hữu. Mỗi tháng cần khoảng S$18.000 cho tiền thuê và các chi phí khác, và mỗi món quà đều giúp trang trải chi phí ấy và xây dựng ngôi nhà thờ Chính thống đầu tiên tại Singapore.", "donAsOf": "Tính đến ngày 1 tháng 8 năm 2026. Trong tháng 7, các khoản dâng cúng đã trang trải chi phí của tháng và giảm khoản thiếu hụt chung từ khoảng S$3.372 xuống còn khoảng S$1.300. Giáo xứ không nhận trợ cấp của chính phủ và sống nhờ sự dâng cúng của tín hữu."}, "th": {"donNeed": "ต้องการทุกเดือน", "donRaised": "ขาดเมื่อสิ้นเดือนมิถุนายน", "donShort": "ขาด ณ วันที่ 1 สิงหาคม", "donBody": "วัดไม่ได้รับเงินสนับสนุนจากรัฐและไม่มีอาคารเป็นของตนเอง — วัดเช่าสถานที่และดำรงอยู่ด้วยเงินถวายของผู้ศรัทธาทั้งสิ้น แต่ละเดือนต้องการราว S$18,000 สำหรับค่าเช่าและค่าใช้จ่ายอื่น ๆ ทุกการถวายช่วยครอบคลุมค่าใช้จ่ายนี้และสร้างโบสถ์ออร์ทอดอกซ์แห่งแรกในสิงคโปร์", "donAsOf": "ณ วันที่ 1 สิงหาคม 2026 ในเดือนกรกฎาคม เงินถวายครอบคลุมค่าใช้จ่ายของเดือนและลดยอดขาดรวมจากประมาณ S$3,372 เหลือประมาณ S$1,300 วัดไม่ได้รับความช่วยเหลือจากรัฐและดำรงอยู่ด้วยเงินถวายของผู้ศรัทธา"}, "ko": {"donNeed": "매월 필요", "donRaised": "6월 말 부족액", "donShort": "8월 1일 기준 부족액", "donBody": "본당은 정부 지원도 없고 자체 건물도 없습니다 — 건물을 임대하며 전적으로 신자들의 헌금으로 유지됩니다. 매달 임대료와 기타 비용으로 약 S$18,000이 필요하며, 여러분의 모든 헌금이 이 비용을 충당하고 싱가포르 최초의 정교회 성당을 짓는 데 도움이 됩니다.", "donAsOf": "2026년 8월 1일 기준. 7월에는 헌금으로 그 달의 비용을 충당하고 전체 부족액을 약 S$3,372에서 약 S$1,300으로 줄였습니다. 본당은 정부 지원을 받지 않으며 신자들의 헌금으로 유지됩니다."}, "ja": {"donNeed": "毎月の必要額", "donRaised": "6月末の不足", "donShort": "8月1日時点の不足", "donBody": "教区は政府の助成も自前の建物もなく、施設を借り、信徒の献金だけで支えられています。毎月、家賃やその他の費用に約 S$18,000 が必要で、皆さまの献金の一つひとつがその費用を賄い、シンガポール初の正教会聖堂を建てる助けとなります。", "donAsOf": "2026年8月1日時点。7月は献金が当月の費用を賄い、全体の不足を約 S$3,372 から約 S$1,300 に減らしました。教区は政府の支援を受けず、信徒の献金によって支えられています。"}, "tl": {"donNeed": "kailangan bawat buwan", "donRaised": "kulang sa katapusan ng Hunyo", "donShort": "kulang sa Agosto 1", "donBody": "Ang parokya ay walang tulong-pananalapi mula sa gobyerno at walang sariling gusali — umuupa ito ng lugar at ganap na umaasa sa mga donasyon ng mga mananampalataya. Bawat buwan ay nangangailangan ng humigit-kumulang S$18,000 para sa upa at iba pang gastos, at bawat handog ay tumutulong na masagot ang gastusing ito at maitayo ang unang simbahang Ortodokso sa Singapore.", "donAsOf": "Sa Agosto 1, 2026. Noong Hulyo, natustusan ng mga donasyon ang gastos ng buwan at nabawasan ang kabuuang kakulangan mula humigit-kumulang S$3,372 tungo sa humigit-kumulang S$1,300. Ang parokya ay hindi tumatanggap ng tulong ng gobyerno at umaasa sa mga handog ng mga mananampalataya."}};
 for(const l in DON_UPDATE){ if(I18N[l]) Object.assign(I18N[l], DON_UPDATE[l]); }
