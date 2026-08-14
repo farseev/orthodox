@@ -2479,7 +2479,14 @@ applyLang(start);
   };
   const DOT = {gold:"#BFA279",blue:"#7C9CC4",red:"#C0222A",green:"#4E8A63",purple:"#8A5A72"};
   const LOC = {en:"en-GB",ru:"ru-RU",zh:"zh-CN",ms:"ms-MY",ta:"ta-IN",id:"id-ID",vi:"vi-VN",th:"th-TH",ko:"ko-KR",ja:"ja-JP",tl:"fil-PH"};
-  let EVENTS = BAKED.slice(); let offset = 0;
+  /* BAKED is a historical snapshot only -- it is intentionally NOT used to seed EVENTS below.
+     A stale-but-non-empty snapshot is worse than no data: it would quietly mask real weeks
+     (partial stale matches would stop the "no data -> show the live calendar" fallback from
+     firing, hiding genuinely-scheduled services that just aren't in the old snapshot). Until a
+     live GCAL_API_KEY is configured, EVENTS stays empty on purpose so every week honestly falls
+     back to the live embedded calendar / "see the calendar" note instead of showing partial,
+     possibly-wrong data. */
+  let EVENTS = []; let offset = 0;
   const listEl=document.getElementById("schList"), rangeEl=document.getElementById("schRange"),
         wrapEmbed=document.getElementById("calEmbedWrap"), liveEl=document.getElementById("schLive"),
         liveTxt=document.getElementById("schLiveTxt"),
@@ -2563,9 +2570,9 @@ applyLang(start);
         const tt=dt.toLocaleTimeString("en-GB",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
         const su=(it.summary||"").trim(); const parts=su.split(/\s*\/\/\s*|\s+\/\s+/);
         out.push({d:dd,t:tt,en:(parts[0]||su),ru:(parts[1]||""),c:colourOf(su)}); });
-      EVENTS = out.length ? out : BAKED.slice();
+      if(out.length) EVENTS = out; // never fall back to the stale BAKED snapshot here
       liveOK = out.length>0; liveAt = new Date(); liveNote(); render();
-    }catch(e){ /* keep whatever EVENTS currently holds (BAKED or last-good live data) */ }
+    }catch(e){ /* keep whatever EVENTS currently holds (last-good live data, or empty) */ }
   }
   render(); loadLive();
   // keep it "live" for anyone who leaves the tab open, and whenever they come back to it
