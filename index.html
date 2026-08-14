@@ -248,6 +248,12 @@ strong{font-weight:600}
   padding:11px 16px;border-radius:2px;transition:.15s}
 .cal-add:hover{background:#cbb088}
 .cal-add svg{width:15px;height:15px}
+.sch-live{display:inline-flex;align-items:center;gap:6px;font:600 .72rem/1 var(--sans);
+  letter-spacing:.02em;color:#4E8A63;margin-right:auto}
+.sch-live[hidden]{display:none}
+.sch-live i{width:7px;height:7px;border-radius:50%;background:#4E8A63;display:inline-block;
+  animation:sch-pulse 1.8s ease-in-out infinite}
+@keyframes sch-pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .cal-embed{margin-top:14px;border:1px solid var(--gold);background:var(--raised);padding:8px}
 .cal-embed iframe{display:block;width:100%;height:640px;border:0;background:#fff}
 @media (max-width:620px){.cal-add{margin-left:0}.cal-bar{gap:10px}}
@@ -664,6 +670,7 @@ footer a{color:var(--gold)}
           <button id="schNext" class="cal-navbtn" type="button" aria-label="Next week">&#8250;</button>
         </div>
         <div class="cal-actions">
+          <span id="schLive" class="sch-live" hidden><i></i><span id="schLiveTxt"></span></span>
           <button id="schToday" class="cal-today" type="button" data-k="schToday">Эта неделя</button>
           <a class="cal-add" id="calAddBtn" href="https://calendar.google.com/calendar/render?cid=9ac614da0e25ad487c562b5686fd4bff92a30786e7c9cb7036012528555a2315%40group.calendar.google.com" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4M12 13v5M9.5 15.5h5"/></svg>
@@ -1101,6 +1108,7 @@ const I18N = {
   schLead:"Bukan sekali seminggu melainkan hampir setiap hari — Liturgi Ilahi pagi dan ibadah petang, Vigili Semalaman menjelang hari Minggu dan hari raya, moleben dan ibadah peringatan.",
   schTitle:"Ibadah pagi dan petang, sepanjang pekan.",
   schToday:"Minggu ini",
+  schLive:"Langsung dari kalender paroki · diperbarui {time}",
   storyKicker:"Paroki",
   storyP1:"Paroki Dormisi Bunda Allah didirikan oleh Sinode Kudus Gereja Ortodoks Rusia pada 12 Oktober 2007, setelah Metropolitan Kirill — kini Yang Mulia Patriark Moskow dan Seluruh Rus′ — mengunjungi Singapura. Ibadah pertama dirayakan di sebuah rumah sewa kecil; sekolah Minggu telah berjalan sejak 2008.",
   storyP2:"Pada 2014 paroki pindah ke 110 Highland Road, lebih dekat ke pusat, di samping MRT Kovan. Gedung itu sengaja dibiarkan tanpa papan nama. “Kami tidak memasang iklan atau papan nama di luar gedung — kami tidak ingin mengganggu tetangga,” jelas sang rektor. Kini paroki menjadi tempat berlindung rohani bagi lebih dari dua ratus orang Kristen Ortodoks dan pusat Keuskupan Singapura.",
@@ -1229,6 +1237,7 @@ const I18N = {
   schLead:"Không phải mỗi tuần một lần mà gần như mỗi ngày — Phụng vụ Thánh buổi sáng và các buổi lễ chiều, Canh thức Trọn đêm trước Chủ nhật và ngày lễ, các buổi moleben và lễ cầu hồn.",
   schTitle:"Lễ sáng và chiều, suốt cả tuần.",
   schToday:"Tuần này",
+  schLive:"Trực tiếp từ lịch giáo xứ · cập nhật {time}",
   storyKicker:"Giáo xứ",
   storyP1:"Giáo xứ Đức Mẹ An Giấc được Thánh Công đồng Giáo hội Chính thống Nga thành lập ngày 12 tháng 10 năm 2007, sau khi Đức Tổng Giám mục Kirill — nay là Đức Thượng phụ Moskva và toàn Rus′ — đến thăm Singapore. Các buổi lễ đầu tiên được cử hành trong một ngôi nhà thuê nhỏ; một trường Chủ nhật đã hoạt động từ năm 2008.",
   storyP2:"Năm 2014 giáo xứ dời về 110 Highland Road, gần trung tâm hơn, bên cạnh ga MRT Kovan. Tòa nhà cố ý không có biển hiệu. “Chúng tôi không quảng cáo hay đặt biển bên ngoài tòa nhà — chúng tôi không muốn làm phiền hàng xóm,” cha xứ giải thích. Ngày nay giáo xứ là chốn nương náu thiêng liêng cho hơn hai trăm Kitô hữu Chính thống và là trụ sở của Giáo phận Singapore.",
@@ -1357,6 +1366,7 @@ const I18N = {
   schLead:"มิใช่สัปดาห์ละครั้ง แต่เกือบทุกวัน — พิธีบูชาศักดิ์สิทธิ์ยามเช้าและพิธีภาคค่ำ พิธีเฝ้าตลอดคืนก่อนวันอาทิตย์และวันฉลอง พิธีวิงวอนและพิธีรำลึกผู้ล่วงลับ",
   schTitle:"พิธีทั้งเช้าและค่ำ ตลอดทั้งสัปดาห์",
   schToday:"สัปดาห์นี้",
+  schLive:"ถ่ายทอดสดจากปฏิทินของวัด · อัปเดตเมื่อ {time}",
   storyKicker:"วัด",
   storyP1:"วัดแห่งการหลับใหลของพระมารดาพระเจ้าก่อตั้งโดยสมัชชาศักดิ์สิทธิ์แห่งคริสตจักรออร์ทอดอกซ์รัสเซียเมื่อวันที่ 12 ตุลาคม 2007 หลังจากที่เมโทรโพลิแทนคิริลล์ — ปัจจุบันคือพระสังฆราชแห่งมอสโกและรัสเซียทั้งปวง — ได้เยือนสิงคโปร์ พิธีแรก ๆ ประกอบในบ้านเช่าหลังเล็ก โรงเรียนวันอาทิตย์ดำเนินมาตั้งแต่ปี 2008",
   storyP2:"ในปี 2014 วัดย้ายไปยัง 110 Highland Road ใกล้ใจกลางมากขึ้น ติดกับสถานี MRT Kovan อาคารนี้จงใจไม่มีป้าย “เราไม่มีโฆษณาหรือป้ายภายนอกอาคาร — เราไม่ต้องการรบกวนเพื่อนบ้าน” เจ้าอาวาสอธิบาย ปัจจุบันวัดเป็นที่พักพิงทางจิตวิญญาณของคริสตชนออร์ทอดอกซ์กว่าสองร้อยคน และเป็นที่ตั้งของสังฆมณฑลสิงคโปร์",
@@ -1485,6 +1495,7 @@ const I18N = {
   schLead:"일주일에 한 번이 아니라 거의 매일 — 이른 아침 성찬예배와 저녁 예배, 주일과 축일 전야의 철야 기도, 기도예배와 위령 예배가 있습니다.",
   schTitle:"아침과 저녁, 한 주 내내 드리는 예배.",
   schToday:"이번 주",
+  schLive:"교구 달력에서 실시간 연동 · {time} 업데이트",
   storyKicker:"본당",
   storyP1:"성모 안식 본당은 2007년 10월 12일 러시아 정교회 거룩한 시노드에 의해 설립되었으며, 이는 키릴 수도대주교 — 현재 모스크바와 온 루스의 총대주교 성하 — 께서 싱가포르를 방문하신 뒤의 일입니다. 첫 예배는 작은 임대 주택에서 봉헌되었고, 주일학교는 2008년부터 운영되고 있습니다.",
   storyP2:"2014년 본당은 중심에 더 가깝고 코반 역 곁에 있는 110 Highland Road로 옮겼습니다. 건물에는 일부러 간판을 두지 않았습니다. “건물 밖에 광고나 간판을 두지 않습니다 — 이웃을 방해하고 싶지 않기 때문입니다,” 라고 주임 사제는 설명했습니다. 오늘날 본당은 이백 명이 넘는 정교회 그리스도인의 영적 안식처이며 싱가포르 교구의 소재지입니다.",
@@ -1613,6 +1624,7 @@ const I18N = {
   schLead:"週に一度ではなく、ほぼ毎日 — 早朝の聖体礼儀と夕の奉神礼、主日と祝日の前晩の徹夜祷、モレーベンと永眠者のための奉神礼があります。",
   schTitle:"朝も夕も、週を通しての奉神礼。",
   schToday:"今週",
+  schLive:"教区カレンダーと連動・{time}更新",
   storyKicker:"教区",
   storyP1:"生神女就寝教会 教区は、キリル府主教 — 現在のモスクワ及び全ロシアの総主教聖下 — がシンガポールを訪れた後、2007年10月12日にロシア正教会の聖務会院によって設立されました。最初の奉神礼は小さな賃貸住宅で行われ、日曜学校は2008年から続いています。",
   storyP2:"2014年、教区は中心により近く、コーヴァン駅の傍らにある 110 Highland Road へ移りました。建物にはあえて看板を掲げていません。「建物の外に広告や看板は出しません — 隣人を煩わせたくないのです」と主任司祭は説明しました。今日、教区は二百人を超える正教のキリスト者の霊的な拠り所であり、シンガポール教区の所在地です。",
@@ -1741,6 +1753,7 @@ const I18N = {
   schLead:"Hindi minsan sa isang linggo kundi halos araw-araw — ang maagang Banal na Liturhiya at mga serbisyo sa gabi, ang Buong-Gabing Pagpupuyat bago ang Linggo at mga kapistahan, mga moleben at serbisyong pang-alaala.",
   schTitle:"Mga serbisyo tuwing umaga at gabi, buong linggo.",
   schToday:"Ngayong linggo",
+  schLive:"Live mula sa kalendaryo ng parokya · na-update {time}",
   storyKicker:"Ang parokya",
   storyP1:"Itinatag ang Parokya ng Pagkakatulog ng Ina ng Diyos ng Banal na Sinodo ng Simbahang Ortodokso ng Russia noong 12 Oktubre 2007, matapos bumisita sa Singapore si Metropolitan Kirill — ngayo'y ang Kanyang Kabanalan ang Patriyarka ng Moscow at ng Buong Rus′. Ipinagdiwang ang mga unang serbisyo sa isang maliit na inuupahang bahay; may paaralang Linggo mula pa noong 2008.",
   storyP2:"Noong 2014 lumipat ang parokya sa 110 Highland Road, mas malapit sa sentro, katabi ng MRT Kovan. Sadyang iniwang walang karatula ang gusali. “Wala kaming patalastas o karatula sa labas ng gusali — ayaw naming gambalain ang aming mga kapitbahay,” paliwanag ng rektor. Sa ngayon ang parokya ay isang espirituwal na kanlungan para sa mahigit dalawang daang Kristiyanong Ortodokso at ang kinauupuan ng Diyosesis ng Singapore.",
@@ -2090,6 +2103,7 @@ const EXTRA = {
   medP1:"Orthodox worship does not try to impress. There are no screens and no special effects — only the ancient Liturgy, the icons, singing without instruments, and the quiet work of standing before God. Beauty here is not for its own sake: it turns the heart toward prayer.",
   medP2:"For what matters most is not the intensity of an experience but a living relationship with God — repentance, communion, and the prayer that slowly changes a person. This is not a concert to attend but a life to enter. Nothing here is made easier: what seems demanding is precisely the depth.",
   schToday:"This week",
+  schLive:"Live · updated {time}",
   calEmpty:"No services are listed for this week. See the parish calendar, or ask on WhatsApp.",
   heroCta3:"Service texts",
   sacrKicker:"Confession & Communion", sacrTitle:"The heart of the Church’s life.",
@@ -2134,6 +2148,7 @@ const EXTRA = {
   medP1:"Православное богослужение не стремится впечатлить. Нет ни экранов, ни спецэффектов — только древняя Литургия, иконы, пение без инструментов и тихий труд стояния перед Богом. Красота здесь не ради красоты: она обращает сердце к молитве.",
   medP2:"Ведь важнее всего не яркость впечатления, а живая связь с Богом — покаяние, причастие, молитва, которая понемногу меняет человека. Это не концерт, который посещают, а жизнь, в которую входят. Поэтому здесь ничего не упрощают: то, что кажется требовательным, и есть глубина.",
   schToday:"Эта неделя",
+  schLive:"Онлайн из календаря прихода · обновлено {time}",
   calEmpty:"На эту неделю службы не указаны. Смотрите календарь прихода или спросите в WhatsApp.",
   heroCta3:"Тексты богослужений",
   sacrKicker:"Исповедь и Причастие", sacrTitle:"Сердце церковной жизни.",
@@ -2178,6 +2193,7 @@ const EXTRA = {
   medP1:"东正教的礼拜不求令人惊艳。这里没有屏幕，没有特效——只有古老的礼仪、圣像、无乐器的咏唱，以及在上帝面前肃立的静默功课。这里的美并非为美而美：它使心转向祈祷。",
   medP2:"因为最重要的不是体验的强烈，而是与上帝真实的关系——悔改、领圣体，以及那使人渐渐改变的祈祷。这不是一场去参加的音乐会，而是一种进入其中的生活。这里不把任何事变得容易：那看似艰难的，正是深度所在。",
   schToday:"本周",
+  schLive:"实时同步教区日历 · {time}更新",
   calEmpty:"本周暂无列出的礼拜。请查看堂区日历，或在 WhatsApp 询问。",
   heroCta3:"礼仪经文",
   sacrKicker:"忏悔与领圣体", sacrTitle:"教会生活的核心。",
@@ -2222,6 +2238,7 @@ const EXTRA = {
   medP1:"Ibadah Ortodoks tidak cuba mengagumkan. Tiada skrin, tiada kesan khas — hanya Liturgi purba, ikon, nyanyian tanpa alat muzik, dan kerja senyap berdiri di hadapan Tuhan. Keindahan di sini bukan untuk keindahan semata: ia memalingkan hati kepada doa.",
   medP2:"Kerana yang paling penting bukan hebatnya sesuatu pengalaman, tetapi hubungan yang hidup dengan Tuhan — pertobatan, perjamuan, dan doa yang perlahan-lahan mengubah seseorang. Ini bukan konsert untuk dihadiri, tetapi kehidupan untuk dimasuki. Tiada apa-apa di sini dipermudah: apa yang kelihatan menuntut, itulah kedalamannya.",
   schToday:"Minggu ini",
+  schLive:"Langsung dari kalendar paroki · dikemas kini {time}",
   calEmpty:"Tiada ibadah disenaraikan untuk minggu ini. Lihat kalendar paroki, atau tanya melalui WhatsApp.",
   heroCta3:"Teks ibadah",
   sacrKicker:"Pengakuan Dosa & Perjamuan Kudus", sacrTitle:"Inti kehidupan Gereja.",
@@ -2266,6 +2283,7 @@ const EXTRA = {
   medP1:"ஆர்த்தடாக்ஸ் வழிபாடு கவர்ச்சியூட்ட முயல்வதில்லை. திரைகளோ சிறப்பு விளைவுகளோ இல்லை — பழம்பெரும் பூஜை, புனிதப் படங்கள், இசைக்கருவியற்ற பாடல், கடவுள் முன் நிற்கும் அமைதியான உழைப்பு மட்டுமே. இங்குள்ள அழகு அழகுக்காக அல்ல: அது இதயத்தை ஜெபத்தை நோக்கித் திருப்புகிறது.",
   medP2:"ஏனெனில் மிக முக்கியமானது அனுபவத்தின் தீவிரம் அல்ல, கடவுளுடனான உயிருள்ள உறவே — மனந்திரும்புதல், நற்கருணை, மனிதனை மெல்ல மாற்றும் ஜெபம். இது கலந்துகொள்ளும் ஒரு இசை நிகழ்ச்சி அல்ல, நுழையும் ஒரு வாழ்க்கை. இங்கே எதுவும் எளிதாக்கப்படவில்லை: கடினமாகத் தோன்றுவதே ஆழம்.",
   schToday:"இந்த வாரம்",
+  schLive:"பங்கின் நாட்காட்டியிலிருந்து நேரலை · {time} புதுப்பிக்கப்பட்டது",
   calEmpty:"இந்த வாரத்திற்கு வழிபாடுகள் பட்டியலிடப்படவில்லை. பங்கின் நாட்காட்டியைப் பார்க்கவும், அல்லது WhatsApp-இல் கேட்கவும்.",
   heroCta3:"வழிபாட்டு உரைகள்",
   sacrKicker:"பாவசங்கீர்த்தனமும் நற்கருணையும்", sacrTitle:"திருச்சபை வாழ்வின் இதயம்.",
@@ -2396,10 +2414,22 @@ applyLang(start);
 
 /* ============ LIVE SERVICE SCHEDULE (styled, from the parish calendar) ============ */
 (function(){
-  /* To make the styled schedule permanently live (beyond the baked window below),
-     create a Google API key in Google Cloud, enable the Calendar API, restrict the key
-     to this website's domain, and paste it here. Left empty, the schedule renders from
-     the snapshot below and falls back to the embedded calendar for weeks with no data. */
+  /* ---- Make this schedule truly live (one-time, ~2 minutes) ----
+     1. console.cloud.google.com -> create/select a project.
+     2. APIs & Services -> Library -> enable "Google Calendar API".
+     3. APIs & Services -> Credentials -> Create credentials -> API key.
+     4. Click the new key -> Restrict key:
+          Application restrictions: HTTP referrers -> add https://orthodox.sg/*
+          API restrictions: Google Calendar API only.
+     5. In Google Calendar (the parish calendar the monks edit) -> Settings and
+        sharing -> Access permissions -> "Make available to public" (See all
+        event details) -- it already is, since the embed below works.
+     6. Paste the key as GCAL_API_KEY below and redeploy.
+     This is the same mechanism WordPress Google Calendar widgets use (an API key
+     against a public calendar) -- restyled here to match the site instead of
+     Google's default widget chrome. Left empty, the section falls back first to
+     the snapshot below, then to the live embedded calendar for weeks with no data,
+     so the page never shows stale info even without a key. */
   const GCAL_API_KEY = "";
   const CAL_ID = "9ac614da0e25ad487c562b5686fd4bff92a30786e7c9cb7036012528555a2315@group.calendar.google.com";
   const TZ = "Asia/Singapore";
@@ -2451,7 +2481,8 @@ applyLang(start);
   const LOC = {en:"en-GB",ru:"ru-RU",zh:"zh-CN",ms:"ms-MY",ta:"ta-IN",id:"id-ID",vi:"vi-VN",th:"th-TH",ko:"ko-KR",ja:"ja-JP",tl:"fil-PH"};
   let EVENTS = BAKED.slice(); let offset = 0;
   const listEl=document.getElementById("schList"), rangeEl=document.getElementById("schRange"),
-        wrapEmbed=document.getElementById("calEmbedWrap"),
+        wrapEmbed=document.getElementById("calEmbedWrap"), liveEl=document.getElementById("schLive"),
+        liveTxt=document.getElementById("schLiveTxt"),
         bPrev=document.getElementById("schPrev"), bNext=document.getElementById("schNext"), bToday=document.getElementById("schToday");
   if(!listEl) return;
   function Lc(){ const l=document.documentElement.lang; return LOC[l]?l:"en"; }
@@ -2507,12 +2538,24 @@ applyLang(start);
     if(/(lent|compline|repentance|andrew of crete|крест|cross|поста|страст)/.test(x)) return "purple";
     if(/(pentecost|trinity|троиц|духов)/.test(x)) return "green";
     return "gold"; }
+  let liveOK=false, liveAt=null;
+  function liveNote(){
+    if(!liveEl || !liveTxt) return;
+    if(liveOK && liveAt){
+      const l=Lc(); const t=liveAt.toLocaleTimeString(LOC[l]||"en-GB",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
+      liveEl.hidden=false;
+      liveTxt.textContent=(I18N[document.documentElement.lang]||I18N.en).schLive
+        ? (I18N[document.documentElement.lang]||I18N.en).schLive.replace("{time}",t)
+        : ("Live \u00b7 updated "+t);
+    } else { liveEl.hidden=true; }
+  }
   async function loadLive(){
     if(!GCAL_API_KEY) return;
     try{ const mon=mondayOf(dObj(sgtToday()));
+      const winStart=addDays(mon,-14), winEnd=addDays(mon,182); // 2wk back / 26wk fwd of headroom
       const url="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(CAL_ID)+"/events"
         +"?key="+GCAL_API_KEY+"&singleEvents=true&orderBy=startTime&maxResults=250"
-        +"&timeMin="+new Date(mon).toISOString()+"&timeMax="+addDays(mon,56).toISOString()+"&timeZone="+TZ;
+        +"&timeMin="+winStart.toISOString()+"&timeMax="+winEnd.toISOString()+"&timeZone="+TZ;
       const r=await fetch(url); if(!r.ok) return; const data=await r.json(); const out=[];
       (data.items||[]).forEach(it=>{ const ss=it.start&&(it.start.dateTime||it.start.date); if(!ss) return;
         const dt=new Date(ss);
@@ -2520,10 +2563,15 @@ applyLang(start);
         const tt=dt.toLocaleTimeString("en-GB",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
         const su=(it.summary||"").trim(); const parts=su.split(/\s*\/\/\s*|\s+\/\s+/);
         out.push({d:dd,t:tt,en:(parts[0]||su),ru:(parts[1]||""),c:colourOf(su)}); });
-      if(out.length){ EVENTS=out; render(); }
-    }catch(e){}
+      EVENTS = out.length ? out : BAKED.slice();
+      liveOK = out.length>0; liveAt = new Date(); liveNote(); render();
+    }catch(e){ /* keep whatever EVENTS currently holds (BAKED or last-good live data) */ }
   }
   render(); loadLive();
+  // keep it "live" for anyone who leaves the tab open, and whenever they come back to it
+  setInterval(loadLive, 10*60*1000);
+  document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") loadLive(); });
+  window.addEventListener("langchange", liveNote);
 })();
 
 /* ============ SERVICE-TEXT / PRAYER LIBRARY (searchable, multilingual) ============ */
