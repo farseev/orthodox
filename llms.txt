@@ -48,6 +48,8 @@ with attribution to orthodox.sg. Last updated 2026-09-23.
   https://orthodox.sg/fasting.html (deep-link with ?date=YYYY-MM-DD&lang=xx&area=Name)
 - Full text of the Divine Liturgy of St John Chrysostom, Church Slavonic and English side by
   side, searchable: https://orthodox.sg/liturgy.html
+- Audio Bible in Russian (all 77 books of the Synodal Bible, recordings by the Orthodox portal «Иисус»):
+  https://orthodox.sg/bible.html
 - Articles on the Orthodox faith: https://orthodox.sg/blog/
 
 ## Languages

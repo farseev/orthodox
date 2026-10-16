@@ -64,6 +64,35 @@ live schedule (weekday names *and* service names), and all three prayer texts.
   browser-upload limit). To add a month, add its `calendar-data/YYYY-MM.js` file; when a month
   file changes, bump `CAL_DATA_VER` in `calendar.html` so browsers fetch the new copy.
 
+- **Illustrations for the Readings (blog).** Each of the 30 articles now has its own engraving,
+  generated with SOMIN's image generator in one style: sepia copperplate engraving on cream paper
+  with a little gold leaf. They show symbolic still lifes and places only — no people, no icons or
+  holy figures, and no text. That follows the brand rules: an icon is a liturgical object, not a
+  graphic, and no stock people. Each image is used at the head of the article in all 18 languages
+  (framed like an icon ark), as the article's share image (`og:image`, JSON-LD, sitemap), and as the
+  preview on the Readings index cards and in "Related reading". Files: `blog/img/<slug>.jpg`
+  (1536×864) and `blog/img/<slug>-card.jpg` (720×405). For a new article, make an image in the same
+  style and save both sizes with the article's slug.
+- **Audio Bible — `bible.html` («Аудиобиблия»).** All 77 books of the Synodal Bible (27 New
+  Testament, 50 Old Testament, Orthodox order), recorded by the Orthodox portal «Иисус»
+  (jesus-portal.ru, АНО «Познание»). The page is linked from the menu on every page and from a new
+  section on the home page, and its interface is in all 18 languages (the recordings are in Russian).
+  It remembers where each listener stopped and goes on to the next book by itself.
+  - **For now each book plays through YouTube's official player** (privacy-enhanced
+    youtube-nocookie), with a «Слушать в Telegram» link to the portal's own post in
+    t.me/BibliaVmeste. YouTube in a browser stops when the phone screen locks, so the page tells
+    listeners to use Telegram in the car or in the background.
+  - **The portal's rules (clause 1.10) forbid copying its audio without consent**, so the recordings
+    are not hosted here. If the portal agrees, put the files at `AUDIO_BASE + code + ".m4a"`
+    (`nt01` … `nt27`, `ot01` … `ot50`, in the order of the page) and set `AUDIO_BASE` at the top of the
+    script in `bible.html`. The page then plays them directly, keeps playing with the screen locked,
+    and shows lock-screen and car controls (Media Session), with ±15/30 s and speed. The whole Bible is
+    116 hours, about 1.2–1.7 GB as speech-quality AAC, which is over GitHub Pages' 1 GB site limit. Host
+    the files elsewhere (for example the Internet Archive or Cloudflare R2) and point `AUDIO_BASE`
+    there; the New Testament alone (20.5 h, about 300 MB) would fit in this repository.
+- The menu now has six items. On screens wider than phones the parish name wraps onto two lines so
+  "Support the parish" stays visible.
+
 ## What changed in an earlier revision
 
 - **Everything is inlined into one file.** The photos are now base64 data-URIs inside
