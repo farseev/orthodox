@@ -26,18 +26,35 @@ live schedule (weekday names *and* service names), and all three prayer texts.
   still needed (36%). Strings are in the `DON_OCT` block of `index.html` (all 18 languages; it
   overrides the older `DON_SEP` / `DON_AUG` blocks), plus the static Russian fallback text and the
   two progress bars (`width:36%`).
-- **Photos.** Three new parish photos added as `photos/26.jpg`–`28.jpg`, and 35 photos from the
-  hierarchical Liturgy of 11 October 2026 as `photos/29.jpg`–`63.jpg` (the slideshow picks up
-  numbered files automatically). The slideshow now starts loading photos only when a visitor
-  scrolls near it, so the 63 photos (~17 MB) are not downloaded on every page view.
+- **No children's faces and no photos of the family who asked, anywhere on the site.** Every photo
+  where a child's face could be seen, even in the background, was taken out — from the slideshow,
+  the five images embedded in `index.html` (`--img-hero`, `--img-story`, `--img-visit`,
+  `--img-depth`, `--img-school`), `og-image.jpg` and the hero video. Photos where children are seen
+  only from behind, with no face visible (`05`, `08`, `14`, `19`, `41` and the history-band image),
+  were kept. No file was deleted: slots `03`, `04` and `07.jpg` now hold other clergy photos from
+  11 October; the other 32 retired numbers hold a copy of `20.jpg` and are listed in the slideshow's
+  `SKIP` set, so they are never shown. The slideshow shows 31 photos. **Before adding a photo,
+  check that no child's face and no one who has asked not to appear is in it**; give it the next
+  free number (64, 65, …) — retired numbers stay in `SKIP`. Older versions of the replaced photos
+  remain in the repository's git history.
+- The slideshow starts loading photos only when a visitor scrolls near it.
+- **"Follow us" section.** The Facebook Page Plugin was replaced by a static card that matches the
+  Instagram one: the page name, four of the site's own photos and a "See more on Facebook" link.
+  Facebook's plugin was showing an empty frame or a log-in prompt to visitors who are not logged in
+  to Facebook or whose browser blocks third-party cookies (Safari, Firefox), and it had a fixed
+  420 px width that did not fit phones. It would also have shown whatever is posted on the Facebook
+  page, children included. Both cards now have square corners, the gold hairline and no shadow or
+  hover-zoom, per the brand guideline, and the untranslated "Follow" button was removed. Their
+  photos are set in `index.html` (`#social`); use only photos that are cleared for the site.
 - **Church calendar.** Full service instructions (Богослужебные указания, from azbyka.ru) and
   Scripture readings with zachala added for **22 October – 2 December 2026** — everything azbyka
   had published on 16 October — in all 18 languages. Readings no longer repeat the zachalo
   number, and Arabic dates now show the Gregorian calendar instead of the Hijri one.
   New-language rubric texts were machine-translated and should be reviewed like the others.
 
-- **Hero background video.** `video/hero.mp4` + `video/hero.webm` (35 s silent loop from the
-  11 October Liturgy, ~3 MB each; the browser downloads only one). It plays behind the hero on
+- **Hero background video.** `video/hero.mp4` + `video/hero.webm` (20 s silent loop of the
+  bishop and priests at the royal doors, 11 October Liturgy, ~1.2 MB each; the browser downloads
+  only one; no children in it). It plays behind the hero on
   screens 768 px and wider, fades in once it starts, pauses when scrolled away, and has a
   pause/play button (WCAG 2.2.2). **Phones keep the still photo**, as do visitors with
   "reduce motion" or data-saver turned on — nothing is downloaded for them. To change the clip,
@@ -90,10 +107,10 @@ The footer still marks this an **unofficial demonstration site**. Before it goes
 2. **The donation figures are a dated snapshot** (11 July 2026). Update them, or replace
    them with a note, when the numbers change. They are plain text in the giving section
    (`#donate`) and the early call-to-action band.
-3. **Photo consent.** The four embedded photos are the parish's own, but faces are
-   visible (the hero and history bands include children, though dimmed). Confirm consent
-   to publish each. To swap one, replace its base64 value in the `:root` variables
-   (`--img-hero`, `--img-story`, `--img-visit`, `--img-depth`).
+3. **Photo consent.** Children's faces and the family who asked have been removed (see the
+   16 October update). Adults' faces are still visible in the photos; confirm the parish is
+   content to publish each. To swap an embedded image, replace its base64 value in the `:root`
+   variables (`--img-hero`, `--img-story`, `--img-visit`, `--img-depth`, `--img-school`).
 4. **Catechetical wording** (Confession/Communion, "who may receive") and the facts
    (address, the "more than 200" figure, new-church status) — confirm with the clergy.
 5. **Test the PayNow QR** once with a banking app (UEN T08SS0198H).
