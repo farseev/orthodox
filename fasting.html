@@ -861,7 +861,7 @@ function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").repla
 
 function computeDay(){
   const today=currentDate(), os=addDays(today,-13);
-  const loc={en:"en-GB",ru:"ru-RU",zh:"zh-CN",ms:"ms-MY",ta:"ta-IN",id:"id-ID",vi:"vi-VN",th:"th-TH",ko:"ko-KR",ja:"ja-JP",tl:"fil-PH",es:"es-ES",pt:"pt-PT",fr:"fr-FR",de:"de-DE",el:"el-GR",ar:"ar-SA",ro:"ro-RO"}[L()]||"en-GB";
+  const loc={en:"en-GB",ru:"ru-RU",zh:"zh-CN",ms:"ms-MY",ta:"ta-IN",id:"id-ID",vi:"vi-VN",th:"th-TH",ko:"ko-KR",ja:"ja-JP",tl:"fil-PH",es:"es-ES",pt:"pt-PT",fr:"fr-FR",de:"de-DE",el:"el-GR",ar:"ar-SA-u-ca-gregory",ro:"ro-RO"}[L()]||"en-GB";
   const nsStr=today.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
   const osStr=os.toLocaleDateString(loc,{day:"numeric",month:"long",timeZone:"UTC"});
   const u=UI[L()]||UI.en;

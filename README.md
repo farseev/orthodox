@@ -19,7 +19,35 @@ Melayu, தமிழ், Bahasa Indonesia, Tiếng Việt, ไทย, 한국어,
 is remembered in the browser. Every part of the site is translated — the interface, the
 live schedule (weekday names *and* service names), and all three prayer texts.
 
-## What changed in this revision
+## Update of 16 October 2026
+
+- **Donations — October 2026 sheet (dated 3 October 2026).** September balance S$263.37 +
+  S$6,237.90 donated 27 Sep–3 Oct = **S$6,501.27** of the S$18,000 monthly need; **S$11,498.73**
+  still needed (36%). Strings are in the `DON_OCT` block of `index.html` (all 18 languages; it
+  overrides the older `DON_SEP` / `DON_AUG` blocks), plus the static Russian fallback text and the
+  two progress bars (`width:36%`).
+- **Photos.** Three new parish photos added as `photos/26.jpg`–`28.jpg`, and 35 photos from the
+  hierarchical Liturgy of 11 October 2026 as `photos/29.jpg`–`63.jpg` (the slideshow picks up
+  numbered files automatically). The slideshow now starts loading photos only when a visitor
+  scrolls near it, so the 63 photos (~17 MB) are not downloaded on every page view.
+- **Church calendar.** Full service instructions (Богослужебные указания, from azbyka.ru) and
+  Scripture readings with zachala added for **22 October – 2 December 2026** — everything azbyka
+  had published on 16 October — in all 18 languages. Readings no longer repeat the zachalo
+  number, and Arabic dates now show the Gregorian calendar instead of the Hijri one.
+  New-language rubric texts were machine-translated and should be reviewed like the others.
+
+- **Hero background video.** `video/hero.mp4` + `video/hero.webm` (35 s silent loop from the
+  11 October Liturgy, ~3 MB each; the browser downloads only one). It plays behind the hero on
+  screens 768 px and wider, fades in once it starts, pauses when scrolled away, and has a
+  pause/play button (WCAG 2.2.2). **Phones keep the still photo**, as do visitors with
+  "reduce motion" or data-saver turned on — nothing is downloaded for them. To change the clip,
+  replace the two files (keep the names).
+- **Calendar data moved out of `calendar.html`** into `calendar-data/2026-01.js` … `2026-12.js`.
+  The page now loads only the month being viewed (it was a single 29 MB file, over GitHub's 25 MB
+  browser-upload limit). To add a month, add its `calendar-data/YYYY-MM.js` file; when a month
+  file changes, bump `CAL_DATA_VER` in `calendar.html` so browsers fetch the new copy.
+
+## What changed in an earlier revision
 
 - **Everything is inlined into one file.** The photos are now base64 data-URIs inside
   `index.html`; the separate image folder is gone.
