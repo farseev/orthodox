@@ -325,6 +325,19 @@ border-radius:3px;font:500 .8rem/1 var(--sans);padding:8px 7px;max-width:30vw}
 /* six nav items: tighter spacing and a two-line parish name so "Support the parish" stays visible */
 @media(min-width:701px){.top .nav a{padding-left:8px;padding-right:8px;font-size:.84rem}.top .brand .ru{white-space:normal;max-width:9.6em;line-height:1.12}.top .brand .en{display:none}}
 </style>
+<style id="navdrop">
+.navsel{display:none}
+@media(max-width:700px){
+  .top .nav{display:none}
+  .top .navsel{display:block;flex:1 1 auto;min-width:0;max-width:none;width:auto;
+    appearance:none;-webkit-appearance:none;background:var(--raised);color:var(--ink);
+    border:1px solid var(--hairline);border-radius:0;font:500 .84rem/1 var(--sans);
+    padding:9px 28px 9px 10px;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23BFA279' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 8px center}
+  html[dir=rtl] .top .navsel{padding:9px 10px 9px 28px;background-position:left 8px center}
+}
+</style>
 </head>
 <body>
 
@@ -1110,5 +1123,36 @@ toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 </script>
 <script>(function(){var a=document.querySelector('.top .nav a[aria-current="page"]');
 if(a&&a.scrollIntoView){try{a.scrollIntoView({inline:'center',block:'nearest'});}catch(e){}}})();</script>
+<script id="navdropjs">(function(){
+  var nav=document.querySelector(".top .nav");
+  if(!nav||document.querySelector(".top .navsel"))return;
+  var sel=document.createElement("select");
+  sel.className="navsel";
+  sel.setAttribute("aria-label","Menu");
+  function fill(){
+    var links=[].slice.call(nav.querySelectorAll("a"));
+    var current="";
+    sel.textContent="";
+    links.forEach(function(a){
+      var o=document.createElement("option");
+      o.value=a.getAttribute("href")||"";
+      o.textContent=(a.textContent||"").replace(/\s+/g," ").trim();
+      if(a.getAttribute("aria-current")==="page"){o.selected=true;current=o.value;}
+      sel.appendChild(o);
+    });
+    if(!current){
+      var path=location.pathname.replace(/\/index\.html$/,"").replace(/\/$/,"");
+      [].forEach.call(sel.options,function(o){
+        var u=o.value.split("#")[0].replace(/\/$/,"");
+        if(u && path.endsWith(u)) o.selected=true;
+      });
+    }
+  }
+  fill();
+  sel.addEventListener("change",function(){ if(sel.value) location.href=sel.value; });
+  var lang=document.getElementById("lang")||document.querySelector(".langpick,.langsel");
+  if(lang) lang.addEventListener("change",function(){ setTimeout(fill,0); });
+  nav.parentNode.insertBefore(sel,nav);
+})();</script>
 </body>
 </html>
