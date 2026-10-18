@@ -560,7 +560,7 @@ document.getElementById("modeBtn").addEventListener("click",()=>{
 });
 
 /* ---- language ---- */
-langSel.addEventListener("change",()=>{ applyUI(); render(); localStorage.setItem("lit_lang",langSel.value); });
+langSel.addEventListener("change",()=>{ applyUI(); render(); if(window.orthodoxSetLang) window.orthodoxSetLang(langSel.value); });
 function applyUI(){
   const u=UI[L()]||UI.en;
   document.querySelectorAll("[data-t]").forEach(el=>{ const k=el.getAttribute("data-t"); if(u[k]!=null) el.textContent=u[k]; });
@@ -697,12 +697,69 @@ const SEARCH_UI={"en":{"searchGo":"Search"},"ru":{"searchGo":"Найти"},"zh":
 for(const l in SEARCH_UI){ if(UI[l]) Object.assign(UI[l], SEARCH_UI[l]); }
 
 (function(){
-  const saved=localStorage.getItem("lit_lang"); if(saved&&UI[saved]) langSel.value=saved;
+  let qLang=null; try{ qLang=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(qLang&&UI[qLang]) langSel.value=qLang;
   applyUI(); render();
 })();
 </script>
 <script>(function(){var a=document.querySelector('.top .nav a[aria-current="page"]');
 if(a&&a.scrollIntoView){try{a.scrollIntoView({inline:'center',block:'nearest'});}catch(e){}}})();</script>
+<script id="langparam">(function(){
+  var LANGS={en:1,ru:1,zh:1,ms:1,ta:1,id:1,vi:1,th:1,ko:1,ja:1,tl:1,es:1,pt:1,fr:1,de:1,el:1,ar:1,ro:1};
+  function ok(l){return !!LANGS[l];}
+  var params; try{params=new URLSearchParams(location.search);}catch(e){params=new URLSearchParams();}
+  var q=params.get("lang");
+  var path=location.pathname;
+  var bm=path.match(/\/blog\/([a-z]{2})(?:\/|$)/);
+  var fileLang=(bm&&ok(bm[1]))?bm[1]:"en";
+  var isBlog=/\/blog(?:\/|$)/.test(path);
+  var isBible=/\/bible\.html$/.test(path);
+  if(isBlog && q && ok(q) && q!==fileLang){
+    var parts=path.split("/");
+    var file=parts.pop()||"index.html";
+    if(parts.length && ok(parts[parts.length-1])) parts.pop();
+    if(q!=="en") parts.push(q);
+    params.set("lang", q);
+    location.replace(parts.join("/")+"/"+file+"?"+params.toString()+location.hash);
+    return;
+  }
+  var lang=(q&&ok(q))?q:(isBible?"ru":(isBlog?fileLang:"en"));
+  function stamp(href, lang, force){
+    if(!href || href.charAt(0)==="#" || /^(https?:|mailto:|tel:|javascript:)/i.test(href)) return href;
+    var hash="", body=href, hi=href.indexOf("#");
+    if(hi>=0){ hash=href.slice(hi); body=href.slice(0,hi); }
+    if(body.indexOf(".html")<0) return href;
+    var base=body, qs="", qi=body.indexOf("?");
+    if(qi>=0){ base=body.slice(0,qi); qs=body.slice(qi+1); }
+    var sp=new URLSearchParams(qs);
+    if(lang==="en" && !force) sp.delete("lang"); else sp.set("lang", lang);
+    var s=sp.toString();
+    return base+(s?"?"+s:"")+hash;
+  }
+  function apply(l){
+    if(!ok(l)) return;
+    document.querySelectorAll("a[href]").forEach(function(a){
+      if(a.classList.contains("bib")) return;
+      var h=a.getAttribute("href");
+      if(h) a.setAttribute("href", stamp(h, l, false));
+    });
+    document.querySelectorAll("option[data-u]").forEach(function(o){
+      var code=o.getAttribute("value"), u=o.getAttribute("data-u");
+      if(u && ok(code)) o.setAttribute("data-u", stamp(u, code, true));
+    });
+  }
+  apply(lang);
+  window.orthodoxSetLang=function(l){
+    if(!ok(l)) return;
+    try{
+      var p=new URLSearchParams(location.search);
+      p.set("lang", l);
+      var s=p.toString();
+      history.replaceState(null, "", location.pathname+(s?"?"+s:"")+location.hash);
+    }catch(e){}
+    apply(l);
+  };
+})();</script>
 <script id="navdropjs">(function(){
   var nav=document.querySelector(".top .nav");
   if(!nav||document.querySelector(".top .navsel"))return;

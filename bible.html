@@ -843,7 +843,7 @@ function applyUI() {
 langSel.addEventListener("change", () => {
   const i = cur, t = snapshotTime();
   const listening = (mode === "audio" && au.src && !au.paused) || (mode === "yt" && yt && yt.getPlayerState && yt.getPlayerState() === 1);
-  store("bible_lang", langSel.value);
+  if (window.orthodoxSetLang) window.orthodoxSetLang(langSel.value);
   applyUI();
   markSources();
   if (i >= 0 && listening) play(i, t);
@@ -857,20 +857,85 @@ langSel.addEventListener("change", () => {
 });
 
 (function init() {
-  const saved = store("bible_lang") || store("lang");
-  const nl = (navigator.language || "").slice(0, 2).toLowerCase();
-  langSel.value = (saved && UI[saved]) ? saved : (UI[nl] ? nl : "ru");
-  if (!UI[langSel.value]) langSel.value = "ru";
+  const qlang = new URLSearchParams(location.search).get("lang");
+  if (qlang && UI[qlang]) langSel.value = qlang;
+  else langSel.value = "ru";
   mode = (store("bible_src") === "audio" && HAS_AUDIO) ? "audio" : "yt";
   applyUI();
-  const h = (location.hash || "").slice(1), hi = BOOKS.findIndex(b => b.c === h);
+  const raw = decodeURIComponent((location.hash || "").replace(/^#/, ""));
+  const bits = raw.split("/");
+  const hi = BOOKS.findIndex(b => b.c === bits[0]);
+  let deepCh = 0, deepT = null;
+  if (bits.length >= 3 && /^\d+$/.test(bits[1]) && /^\d+$/.test(bits[2])) { deepCh = +bits[1]; deepT = +bits[2]; }
+  else if (bits.length === 2 && /^\d+$/.test(bits[1])) deepT = +bits[1];
   markSources();
   if (mode === "audio") setAudioUI(true);
   loadYT(() => {});
-  if (hi >= 0) { cur = hi; renderNow(); showTab(hi < 27 ? "nt" : "ot"); $("posterTxt").textContent = BOOKS[hi].n; $("posterTxt").lang = editionEn() ? "en" : "ru"; }
+  if (hi >= 0 && deepT != null) {
+    const key = (editionEn() ? "en" : "ru") + ":" + BOOKS[hi].c;
+    if (deepCh >= 1) readPos[key] = deepCh;
+    play(hi, deepT);
+    try { history.replaceState(null, "", "#" + raw); } catch (e) {}
+  } else if (hi >= 0) { cur = hi; renderNow(); showTab(hi < 27 ? "nt" : "ot"); $("posterTxt").textContent = BOOKS[hi].n; $("posterTxt").lang = editionEn() ? "en" : "ru"; }
   else { const i = savedIndex(); if (i >= 0) showTab(i < 27 ? "nt" : "ot"); }
 })();
 </script>
+<script id="langparam">(function(){
+  var LANGS={en:1,ru:1,zh:1,ms:1,ta:1,id:1,vi:1,th:1,ko:1,ja:1,tl:1,es:1,pt:1,fr:1,de:1,el:1,ar:1,ro:1};
+  function ok(l){return !!LANGS[l];}
+  var params; try{params=new URLSearchParams(location.search);}catch(e){params=new URLSearchParams();}
+  var q=params.get("lang");
+  var path=location.pathname;
+  var bm=path.match(/\/blog\/([a-z]{2})(?:\/|$)/);
+  var fileLang=(bm&&ok(bm[1]))?bm[1]:"en";
+  var isBlog=/\/blog(?:\/|$)/.test(path);
+  var isBible=/\/bible\.html$/.test(path);
+  if(isBlog && q && ok(q) && q!==fileLang){
+    var parts=path.split("/");
+    var file=parts.pop()||"index.html";
+    if(parts.length && ok(parts[parts.length-1])) parts.pop();
+    if(q!=="en") parts.push(q);
+    params.set("lang", q);
+    location.replace(parts.join("/")+"/"+file+"?"+params.toString()+location.hash);
+    return;
+  }
+  var lang=(q&&ok(q))?q:(isBible?"ru":(isBlog?fileLang:"en"));
+  function stamp(href, lang, force){
+    if(!href || href.charAt(0)==="#" || /^(https?:|mailto:|tel:|javascript:)/i.test(href)) return href;
+    var hash="", body=href, hi=href.indexOf("#");
+    if(hi>=0){ hash=href.slice(hi); body=href.slice(0,hi); }
+    if(body.indexOf(".html")<0) return href;
+    var base=body, qs="", qi=body.indexOf("?");
+    if(qi>=0){ base=body.slice(0,qi); qs=body.slice(qi+1); }
+    var sp=new URLSearchParams(qs);
+    if(lang==="en" && !force) sp.delete("lang"); else sp.set("lang", lang);
+    var s=sp.toString();
+    return base+(s?"?"+s:"")+hash;
+  }
+  function apply(l){
+    if(!ok(l)) return;
+    document.querySelectorAll("a[href]").forEach(function(a){
+      if(a.classList.contains("bib")) return;
+      var h=a.getAttribute("href");
+      if(h) a.setAttribute("href", stamp(h, l, false));
+    });
+    document.querySelectorAll("option[data-u]").forEach(function(o){
+      var code=o.getAttribute("value"), u=o.getAttribute("data-u");
+      if(u && ok(code)) o.setAttribute("data-u", stamp(u, code, true));
+    });
+  }
+  apply(lang);
+  window.orthodoxSetLang=function(l){
+    if(!ok(l)) return;
+    try{
+      var p=new URLSearchParams(location.search);
+      p.set("lang", l);
+      var s=p.toString();
+      history.replaceState(null, "", location.pathname+(s?"?"+s:"")+location.hash);
+    }catch(e){}
+    apply(l);
+  };
+})();</script>
 <script id="navdropjs">(function(){
   var nav=document.querySelector(".top .nav");
   if(!nav||document.querySelector(".top .navsel"))return;
