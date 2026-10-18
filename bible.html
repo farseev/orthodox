@@ -160,6 +160,15 @@ select.speed{height:44px;border:1px solid var(--hairline);background:var(--page)
 .tg:hover{color:#229ED9;background:var(--raised)}
 .tg.none{visibility:hidden}
 .credit{margin:22px 0 0;font:400 .9rem/1.6 var(--sans);color:var(--ink);max-width:78ch}
+.read{margin:22px 0 0;padding:16px 16px 8px;background:var(--raised);border:1px solid var(--hairline)}
+.read[hidden]{display:none}
+.readk{margin:0;font-family:var(--serif);font-size:1.45rem;font-weight:500;line-height:1.25}
+.chnav{display:flex;align-items:center;gap:8px;margin-top:12px}
+.chnav[hidden]{display:none}
+.chnav select{flex:1;min-width:0;height:44px;border:1px solid var(--hairline);background:var(--page);color:var(--ink);font:500 1.05rem/1 var(--serif);padding:0 8px;border-radius:0}
+.chh{font-family:var(--serif);font-weight:500;font-size:1.65rem;line-height:1.2;margin:16px 0 12px;scroll-margin-top:72px}
+.verses p{font-family:var(--serif);font-size:1.28rem;line-height:1.55;margin:0 0 .8em}
+.verses sup{font-family:var(--sans);font-size:.58em;font-weight:600;color:var(--gold-text);margin-inline-end:.35em;position:relative;top:-.25em}
 .portal{margin:18px 0 0;padding:14px 16px;border:1px solid var(--gold);background:var(--raised);font:500 .98rem/1.55 var(--sans);color:var(--ink)}
 .portal a,.credit a{color:var(--gold-text);font-weight:600}
 html.edition-en .books .tg{display:none}
@@ -250,6 +259,17 @@ footer a{color:var(--gold-text)}
       <p class="bgnote" id="bgNote" data-t="bgNote">Нажмите «Аудио», чтобы слушать с выключенным экраном и в других приложениях — с того же места, и когда вернётесь тоже. YouTube на этой странице останавливается, когда вы уходите.</p>
       <button class="resume" id="resume" type="button"></button>
       <audio id="au" preload="none" playsinline webkit-playsinline></audio>
+    </section>
+
+    <section class="read" id="read" hidden>
+      <p class="readk" id="readBook"></p>
+      <div class="chnav" id="chNav">
+        <button class="cbtn" id="chPrev" type="button">‹</button>
+        <select id="chSel"></select>
+        <button class="cbtn" id="chNext" type="button">›</button>
+      </div>
+      <h2 class="chh" id="chH"></h2>
+      <div class="verses" id="verses"></div>
     </section>
 
     <aside class="car" id="car">
@@ -382,7 +402,104 @@ function renderNow() {
   $("prevBtn").disabled = cur <= 0; $("nextBtn").disabled = cur >= BOOKS.length - 1;
   document.querySelectorAll(".books li").forEach(li => li.classList.toggle("on", li.id === (cur >= 0 ? "b-" + BOOKS[cur].c : "")));
   renderResume();
+  showReading();
 }
+const CH = {
+  en: n => "Chapter " + n, ru: n => "Глава " + n, zh: n => "第" + n + "章", ms: n => "Pasal " + n,
+  ta: n => "அதிகாரம் " + n, id: n => "Pasal " + n, vi: n => "Chương " + n, th: n => "บทที่ " + n,
+  ko: n => n + "장", ja: n => "第" + n + "章", tl: n => "Kabanata " + n, es: n => "Capítulo " + n,
+  pt: n => "Capítulo " + n, fr: n => "Chapitre " + n, de: n => "Kapitel " + n, el: n => "Κεφάλαιο " + n,
+  ar: n => "الإصحاح " + n, ro: n => "Capitolul " + n
+};
+const CHNAV = {
+  en: ["Previous chapter", "Next chapter"], ru: ["Предыдущая глава", "Следующая глава"],
+  zh: ["上一章", "下一章"], ms: ["Pasal sebelumnya", "Pasal seterusnya"], ta: ["முந்தைய அதிகாரம்", "அடுத்த அதிகாரம்"],
+  id: ["Pasal sebelumnya", "Pasal berikutnya"], vi: ["Chương trước", "Chương sau"], th: ["บทก่อนหน้า", "บทถัดไป"],
+  ko: ["이전 장", "다음 장"], ja: ["前の章", "次の章"], tl: ["Nakaraang kabanata", "Susunod na kabanata"],
+  es: ["Capítulo anterior", "Capítulo siguiente"], pt: ["Capítulo anterior", "Capítulo seguinte"],
+  fr: ["Chapitre précédent", "Chapitre suivant"], de: ["Vorheriges Kapitel", "Nächstes Kapitel"],
+  el: ["Προηγούμενο κεφάλαιο", "Επόμενο κεφάλαιο"], ar: ["الإصحاح السابق", "الإصحاح التالي"],
+  ro: ["Capitolul anterior", "Capitolul următor"]
+};
+const READERR = {
+  en: "This chapter could not be loaded.", ru: "Не удалось открыть эту главу.", zh: "这一章暂时无法打开。",
+  ms: "Pasal ini tidak dapat dibuka.", ta: "இந்த அதிகாரத்தைத் திறக்க முடியவில்லை.", id: "Pasal ini tidak dapat dibuka.",
+  vi: "Không mở được chương này.", th: "เปิดบทนี้ไม่ได้", ko: "이 장을 열 수 없습니다.", ja: "この章を開けません。",
+  tl: "Hindi mabuksan ang kabanatang ito.", es: "No se pudo abrir este capítulo.", pt: "Não foi possível abrir este capítulo.",
+  fr: "Ce chapitre n’a pas pu être ouvert.", de: "Dieses Kapitel konnte nicht geöffnet werden.",
+  el: "Αυτό το κεφάλαιο δεν άνοιξε.", ar: "تعذر فتح هذا الإصحاح.", ro: "Acest capitol nu a putut fi deschis."
+};
+function chapterTitle(n) { return (CH[L()] || CH.en)(n); }
+const readCache = {}, readPos = {};
+let readShown = "", readToken = 0;
+function showReading() {
+  const box = $("read");
+  if (cur < 0) { box.hidden = true; return; }
+  const b = BOOKS[cur], lang = editionEn() ? "en" : "ru", key = lang + ":" + b.c;
+  box.hidden = false;
+  $("readBook").textContent = b.n;
+  $("readBook").lang = lang;
+  $("readBook").dir = "ltr";
+  const navL = CHNAV[L()] || CHNAV.en;
+  $("chPrev").setAttribute("aria-label", navL[0]);
+  $("chNext").setAttribute("aria-label", navL[1]);
+  if (readShown === key && readCache[key]) { renderChapter(key); return; }
+  readShown = key;
+  const token = ++readToken;
+  if (!readPos[key]) readPos[key] = readPos[(lang === "en" ? "ru:" : "en:") + b.c] || 1;
+  $("verses").textContent = "";
+  $("chH").textContent = chapterTitle(readPos[key]);
+  const apply = data => { if (token !== readToken) return; readCache[key] = data; renderChapter(key); };
+  if (readCache[key]) { apply(readCache[key]); return; }
+  fetch("bible-text/" + lang + "/" + b.c + ".json").then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(apply).catch(() => {
+    if (token !== readToken) return;
+    $("verses").textContent = READERR[L()] || READERR.en;
+  });
+}
+function renderChapter(key) {
+  const data = readCache[key]; if (!data) return;
+  let n = readPos[key] || 1;
+  if (n < 1 || n > data.length) n = 1;
+  readPos[key] = n;
+  $("chH").textContent = chapterTitle(n);
+  const sel = $("chSel"), nav = $("chNav");
+  nav.hidden = data.length < 2;
+  if (sel.dataset.key !== key) {
+    sel.dataset.key = key;
+    sel.replaceChildren();
+    for (let i = 1; i <= data.length; i++) {
+      const o = document.createElement("option");
+      o.value = String(i); o.textContent = chapterTitle(i); sel.appendChild(o);
+    }
+  }
+  sel.value = String(n);
+  sel.setAttribute("aria-label", chapterTitle(n));
+  $("chPrev").disabled = n <= 1;
+  $("chNext").disabled = n >= data.length;
+  const verses = $("verses");
+  verses.lang = key.slice(0, 2);
+  verses.dir = "ltr";
+  verses.replaceChildren();
+  data[n - 1].forEach(pair => {
+    const text = pair[1], cut = text.length > 600 ? text.indexOf("] ") : -1;
+    const parts = cut > 40 ? [text.slice(0, cut + 1), text.slice(cut + 2)] : [text];
+    parts.forEach((part, i) => {
+      const p = document.createElement("p");
+      if (i === 0) { const sup = document.createElement("sup"); sup.textContent = pair[0]; p.appendChild(sup); }
+      p.appendChild(document.createTextNode(part));
+      verses.appendChild(p);
+    });
+  });
+}
+function stepChapter(d) {
+  if (!readShown || !readCache[readShown]) return;
+  readPos[readShown] = (readPos[readShown] || 1) + d;
+  renderChapter(readShown);
+  $("chH").scrollIntoView({ block: "start" });
+}
+$("chPrev").onclick = () => stepChapter(-1);
+$("chNext").onclick = () => stepChapter(1);
+$("chSel").onchange = () => { if (!readShown) return; readPos[readShown] = +$("chSel").value || 1; renderChapter(readShown); $("chH").scrollIntoView({ block: "start" }); };
 $("prevBtn").onclick = () => { if (cur > 0) play(cur - 1, 0); };
 $("nextBtn").onclick = () => { if (cur < BOOKS.length - 1) play(cur + 1, 0); };
 $("poster").onclick = () => { const i = cur >= 0 ? cur : savedIndex(); if (i >= 0) play(i, i === savedIndex() ? savedTime() : 0); else play(0, 0); };
