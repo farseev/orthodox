@@ -169,6 +169,8 @@ select.speed{height:44px;border:1px solid var(--hairline);background:var(--page)
 .chh{font-family:var(--serif);font-weight:500;font-size:1.65rem;line-height:1.2;margin:16px 0 12px;scroll-margin-top:72px}
 .verses p{font-family:var(--serif);font-size:1.28rem;line-height:1.55;margin:0 0 .8em}
 .verses sup{font-family:var(--sans);font-size:.58em;font-weight:600;color:var(--gold-text);margin-inline-end:.35em;position:relative;top:-.25em}
+.verses p.hl{background:var(--lit-wash);padding:.12em .5em;margin-inline:-.5em;scroll-margin:88px}
+.verses p.hl{background:color-mix(in srgb, var(--gold) 22%, var(--lit-wash))}
 .portal{margin:18px 0 0;padding:14px 16px;border:1px solid var(--gold);background:var(--raised);font:500 .98rem/1.55 var(--sans);color:var(--ink)}
 .portal a,.credit a{color:var(--gold-text);font-weight:600}
 html.edition-en .books .tg{display:none}
@@ -443,13 +445,13 @@ function showReading() {
   const navL = CHNAV[L()] || CHNAV.en;
   $("chPrev").setAttribute("aria-label", navL[0]);
   $("chNext").setAttribute("aria-label", navL[1]);
-  if (readShown === key && readCache[key]) { renderChapter(key); return; }
+  if (readShown === key && readCache[key]) { alignChapter(key); renderChapter(key); return; }
   readShown = key;
   const token = ++readToken;
   if (!readPos[key]) readPos[key] = readPos[(lang === "en" ? "ru:" : "en:") + b.c] || 1;
   $("verses").textContent = "";
   $("chH").textContent = chapterTitle(readPos[key]);
-  const apply = data => { if (token !== readToken) return; readCache[key] = data; renderChapter(key); };
+  const apply = data => { if (token !== readToken) return; readCache[key] = data; alignChapter(key); renderChapter(key); };
   if (readCache[key]) { apply(readCache[key]); return; }
   fetch("bible-text/" + lang + "/" + b.c + ".json").then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(apply).catch(() => {
     if (token !== readToken) return;
@@ -485,11 +487,14 @@ function renderChapter(key) {
     const parts = cut > 40 ? [text.slice(0, cut + 1), text.slice(cut + 2)] : [text];
     parts.forEach((part, i) => {
       const p = document.createElement("p");
+      p.dataset.v = String(pair[0]);
       if (i === 0) { const sup = document.createElement("sup"); sup.textContent = pair[0]; p.appendChild(sup); }
       p.appendChild(document.createTextNode(part));
       verses.appendChild(p);
     });
   });
+  paintVerse(cur >= 0 ? verseShown(cur, n, readingNow()) : 1, hlWantScroll);
+  hlWantScroll = false;
 }
 /* Reading time of a chapter: characters before it ÷ characters in the book × BOOKS[i].d.
    Chapter 1 is 0, so only that seek plays the spoken notice. Later chapters seek past it. */
@@ -507,6 +512,122 @@ function chapterReading(i, n) {
     if (c < n - 1) before += len;
   }
   return total ? before / total * dur : 0;
+}
+/* Verse start = characters before it ÷ characters in the book × BOOKS[i].d (same as chapterReading).
+   One verse is highlighted. A chapter crossed by playback only changes the text on screen. */
+const spanCache = {};
+let hlKey = "", hlMark = "", hlFresh = true, hlWantScroll = false, heard = null;
+function spansFor(i) {
+  if (i < 0) return null;
+  const key = (editionEn() ? "en" : "ru") + ":" + BOOKS[i].c;
+  const data = readCache[key];
+  const dur = BOOKS[i].d || 0;
+  if (!data || !dur) return null;
+  const hit = spanCache[key];
+  if (hit && hit.data === data && hit.dur === dur) return hit;
+  const chapters = [];
+  let total = 0;
+  for (let c = 0; c < data.length; c++) {
+    const verses = [];
+    const origin = total;
+    const ch = data[c] || [];
+    for (let v = 0; v < ch.length; v++) {
+      const len = String(ch[v][1] || "").length;
+      verses.push({ n: ch[v][0], at: total });
+      total += len;
+    }
+    chapters.push({ origin: origin, verses: verses });
+  }
+  return spanCache[key] = { data: data, dur: dur, total: total, chapters: chapters };
+}
+function locateVerse(i, reading) {
+  const box = spansFor(i);
+  if (!box || !box.total) return null;
+  const t = Math.max(0, +reading || 0);
+  let ch = 0;
+  for (let c = 0; c < box.chapters.length; c++) {
+    if (box.chapters[c].origin / box.total * box.dur <= t + 1e-4) ch = c;
+    else break;
+  }
+  const verses = box.chapters[ch].verses;
+  let verse = verses.length ? verses[0].n : 1;
+  for (let v = 0; v < verses.length; v++) {
+    if (verses[v].at / box.total * box.dur <= t + 1e-4) verse = verses[v].n;
+    else break;
+  }
+  return { ch: ch + 1, verse: verse };
+}
+function verseShown(i, ch, reading) {
+  const box = spansFor(i);
+  const slot = box && box.chapters[ch - 1];
+  if (!slot || !slot.verses.length) return 1;
+  const t = Math.max(0, +reading || 0);
+  let verse = slot.verses[0].n;
+  if (!box.total) return verse;
+  for (let v = 0; v < slot.verses.length; v++) {
+    if (slot.verses[v].at / box.total * box.dur <= t + 1e-4) verse = slot.verses[v].n;
+    else break;
+  }
+  return verse;
+}
+function liveReading() {
+  if (cur < 0) return null;
+  if (mode === "audio") {
+    if (au.dataset.code === BOOKS[cur].c && au.src && au.readyState >= 1) return readingOf(au.currentTime || 0);
+    return null;
+  }
+  try { if (ytReady(cur)) return ytReading(); } catch (e) {}
+  return null;
+}
+function readingNow() {
+  if (cur < 0) return 0;
+  const live = liveReading();
+  if (chapterPin && chapterPin.i === cur && Date.now() - chapterPin.at < 8000) {
+    if (live == null || Math.abs(live - chapterPin.t) > 2) return chapterPin.t;
+  }
+  if (live != null) { heard = { i: cur, t: live }; return live; }
+  if (heard && heard.i === cur) return heard.t;
+  return 0;
+}
+function alignChapter(key) {
+  if (cur < 0 || !readCache[key]) return;
+  const loc = locateVerse(cur, readingNow());
+  if (loc) readPos[key] = loc.ch;
+}
+function paintVerse(verse, scroll) {
+  const box = $("verses");
+  if (!box) return;
+  const key = readShown;
+  if (key !== hlKey) { hlKey = key; hlMark = ""; hlFresh = true; }
+  const mark = (readPos[key] || 1) + ":" + verse;
+  let el = null;
+  box.querySelectorAll("p").forEach(p => {
+    const on = p.dataset.v === String(verse);
+    p.classList.toggle("hl", on);
+    if (on && !el) el = p;
+  });
+  const changed = mark !== hlMark;
+  hlMark = mark;
+  if (hlFresh) { hlFresh = false; return; }
+  if (!scroll || !changed || !el) return;
+  const r = el.getBoundingClientRect();
+  if (r.top >= 64 && r.bottom <= window.innerHeight - 4) return;
+  el.scrollIntoView({ block: "nearest" });
+}
+function followChapter(scroll) {
+  if (cur < 0) return;
+  const key = (editionEn() ? "en" : "ru") + ":" + BOOKS[cur].c;
+  if (readShown !== key || !readCache[key]) return;
+  const loc = locateVerse(cur, readingNow());
+  if (!loc) return;
+  if ((readPos[key] || 1) !== loc.ch) {
+    readPos[key] = loc.ch;
+    hlWantScroll = !!scroll;
+    renderChapter(key);
+    return;
+  }
+  if ((loc.ch + ":" + loc.verse) === hlMark && $("verses").querySelector("p.hl")) return;
+  paintVerse(loc.verse, !!scroll);
 }
 function audioReady(i) {
   return au.dataset.code === BOOKS[i].c && !!au.src && au.readyState >= 1;
@@ -600,6 +721,7 @@ function stepChapter(d) {
   const data = readCache[readShown];
   const n = (readPos[readShown] || 1) + d;
   if (n < 1 || n > data.length) return;
+  chapterPin = { i: cur, t: chapterReading(cur, n), at: Date.now() };
   readPos[readShown] = n;
   renderChapter(readShown);
   $("chH").scrollIntoView({ block: "start" });
@@ -609,7 +731,9 @@ $("chPrev").onclick = () => stepChapter(-1);
 $("chNext").onclick = () => stepChapter(1);
 $("chSel").onchange = () => {
   if (!readShown) return;
-  readPos[readShown] = +$("chSel").value || 1;
+  const n = +$("chSel").value || 1;
+  chapterPin = { i: cur, t: chapterReading(cur, n), at: Date.now() };
+  readPos[readShown] = n;
   renderChapter(readShown);
   $("chH").scrollIntoView({ block: "start" });
   seekPlayingChapter();
@@ -619,7 +743,9 @@ $("nextBtn").onclick = () => { if (cur < BOOKS.length - 1) play(cur + 1, 0); };
 $("poster").onclick = () => { const i = cur >= 0 ? cur : savedIndex(); if (i >= 0) play(i, i === savedIndex() ? savedTime() : 0); else play(0, 0); };
 
 function play(i, start) {
-  cur = i; renderNow(); showTab(i < 27 ? "nt" : "ot");
+  cur = i;
+  chapterPin = { i: i, t: Math.max(0, +start || 0), at: Date.now() };
+  renderNow(); showTab(i < 27 ? "nt" : "ot");
   try { history.replaceState(null, "", "#" + BOOKS[i].c); } catch (e) {}
   save(start || 0, true);
   if (mode === "audio" && HAS_AUDIO) {
@@ -688,7 +814,7 @@ function onYTState(e) {
     try { if (e.target && e.target.pauseVideo) e.target.pauseVideo(); } catch (err) {}
     return;
   }
-  if (e.data === YT.PlayerState.PLAYING) { $("ytErr").hidden = true; save(ytReading(), true); }
+  if (e.data === YT.PlayerState.PLAYING) { $("ytErr").hidden = true; save(ytReading(), true); followChapter(false); }
   else if (e.data === YT.PlayerState.ENDED) {
     if (cur < 0) return;
     const cs = clips(BOOKS[cur]);
@@ -740,6 +866,7 @@ function ytReading() {
 }
 setInterval(() => {
   if (mode === "yt" && yt && yt.getPlayerState && yt.getPlayerState() === 1) save(ytReading());
+  followChapter(true);
 }, 5000);
 
 /* ---- Hosted audio: explicit "Audio" source. Stays playing when the screen locks or another app opens. ---- */
@@ -792,16 +919,21 @@ function chooseSource(next) {
     if (next === "audio") {
       const src = audioSrc(cur);
       const resumeAt = au.dataset.src === src ? readingOf(au.currentTime || 0) : savedTime();
+      chapterPin = { i: cur, t: resumeAt, at: Date.now() };
       if (!au.src || au.dataset.src !== src) playAudioAt(cur, resumeAt);
       else if (au.paused) { playAudioAt(cur, resumeAt); }
     } else {
-      try { if (yt && yt.playVideo) yt.playVideo(); else playYT(cur, snapshotTime()); }
-      catch (e) { playYT(cur, snapshotTime()); }
+      const t = snapshotTime();
+      chapterPin = { i: cur, t: t, at: Date.now() };
+      try { if (yt && yt.playVideo) yt.playVideo(); else playYT(cur, t); }
+      catch (e) { playYT(cur, t); }
     }
     markSources();
+    followChapter(false);
     return;
   }
   const t = snapshotTime();
+  chapterPin = { i: cur, t: t, at: Date.now() };
   save(t, true);
   mode = next;
   store("bible_src", mode);
@@ -817,6 +949,7 @@ function chooseSource(next) {
     setAudioUI(false);
     playYT(cur, t);
   }
+  followChapter(false);
 }
 function setMediaSession(i) {
   if (!("mediaSession" in navigator) || i < 0) return;
@@ -891,8 +1024,10 @@ function readingDur() {
 function skip(d) {
   if (!au.duration) return;
   const reading = Math.min(Math.max(0, readingOf(au.currentTime) + d), Math.max(0, readingDur() - 0.3));
+  chapterPin = { i: cur, t: reading, at: Date.now() };
   au.currentTime = fileOf(reading);
   save(reading, true);
+  followChapter(true);
 }
 /* Leaving the page must not switch source or restart. Only remember the Audio position. */
 document.addEventListener("visibilitychange", () => {
@@ -917,10 +1052,12 @@ if (HAS_AUDIO) {
   au.addEventListener("play", () => {
     $("ppIcon").innerHTML = PAUSE;
     if (navigator.mediaSession) navigator.mediaSession.playbackState = "playing";
+    followChapter(false);
   });
   au.addEventListener("pause", () => {
     $("ppIcon").innerHTML = PLAY;
     if (navigator.mediaSession) navigator.mediaSession.playbackState = "paused";
+    followChapter(false);
   });
   au.addEventListener("timeupdate", () => {
     if (mode !== "audio") return;
@@ -930,6 +1067,7 @@ if (HAS_AUDIO) {
     $("tCur").textContent = clock(r);
     $("tDur").textContent = clock(dur);
     if (!seeking) $("seek").value = dur ? Math.round(Math.min(r, dur) / dur * 1000) : 0;
+    if (!seeking) followChapter(true);
     if (navigator.mediaSession && navigator.mediaSession.setPositionState && au.duration) {
       try { navigator.mediaSession.setPositionState({ duration: au.duration, playbackRate: au.playbackRate, position: au.currentTime }); } catch (e) {}
     }
@@ -940,7 +1078,16 @@ if (HAS_AUDIO) {
   });
   const sk = $("seek"); sk.max = 1000;
   sk.addEventListener("input", () => { seeking = true; const dur = readingDur(); if (dur) $("tCur").textContent = clock(sk.value / 1000 * dur); });
-  sk.addEventListener("change", () => { const dur = readingDur(); if (dur) au.currentTime = fileOf(sk.value / 1000 * dur); seeking = false; });
+  sk.addEventListener("change", () => {
+    const dur = readingDur();
+    if (dur) {
+      const reading = sk.value / 1000 * dur;
+      chapterPin = { i: cur, t: reading, at: Date.now() };
+      au.currentTime = fileOf(reading);
+      followChapter(true);
+    }
+    seeking = false;
+  });
   if ("mediaSession" in navigator) {
     const ms = navigator.mediaSession, set = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) {} };
     set("play", () => { if (mode === "audio") au.play(); else chooseSource("audio"); });
@@ -970,6 +1117,7 @@ function applyUI() {
 langSel.addEventListener("change", () => {
   const i = cur, t = snapshotTime();
   const listening = (mode === "audio" && au.src && !au.paused) || (mode === "yt" && yt && yt.getPlayerState && yt.getPlayerState() === 1);
+  if (i >= 0) chapterPin = { i: i, t: t, at: Date.now() };
   if (window.orthodoxSetLang) window.orthodoxSetLang(langSel.value);
   applyUI();
   markSources();
