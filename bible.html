@@ -318,8 +318,11 @@ let mode = "yt";          /* "yt" | "audio" — only changes when the user picks
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 function L() { return UI[langSel.value] ? langSel.value : "ru"; }
 function editionEn() { return L() === "en"; }
-/* Spoken notice at the start of every hosted file. YouTube itself has no notice, so the clock is the reading. */
-const LEAD = { en: 4.42, ru: 4.85 };
+/* Spoken notice prepended to every hosted file. YouTube has none, so its clock is the reading.
+   Measured on the files (same notice on every book): English speech ends at 3.57s and the
+   YouTube audio begins at 4.42s; Russian speech ends at 4.03s and the reading begins at 4.852s.
+   The pad after the speech is part of the notice. Resume, seek, and the highlight all use this. */
+const LEAD = { en: 4.42, ru: 4.852 };
 function lead() { return editionEn() ? LEAD.en : LEAD.ru; }
 function readingOf(fileTime) { return Math.max(0, (fileTime || 0) - lead()); }
 function fileOf(readingTime) { return Math.max(0, readingTime || 0) + lead(); }
@@ -496,97 +499,97 @@ function renderChapter(key) {
   paintVerse(cur >= 0 ? verseShown(cur, n, readingNow()) : 1, hlWantScroll);
   hlWantScroll = false;
 }
-/* Reading time of a chapter: characters before it ÷ characters in the book × BOOKS[i].d.
-   Chapter 1 is 0, so only that seek plays the spoken notice. Later chapters seek past it. */
-function chapterReading(i, n) {
-  if (i < 0 || n <= 1) return 0;
-  const data = readCache[(editionEn() ? "en" : "ru") + ":" + BOOKS[i].c];
-  const dur = BOOKS[i].d || 0;
-  if (!data || !dur || n > data.length) return 0;
-  let before = 0, total = 0;
-  for (let c = 0; c < data.length; c++) {
-    let len = 0;
-    const ch = data[c];
-    for (let v = 0; v < ch.length; v++) len += String(ch[v][1] || "").length;
-    total += len;
-    if (c < n - 1) before += len;
-  }
-  return total ? before / total * dur : 0;
-}
-/* Verse start = characters before it ÷ characters in the book × BOOKS[i].d (same as chapterReading).
-   One verse is highlighted. A chapter crossed by playback only changes the text on screen. */
-const spanCache = {};
+/* One table of verse start times, in reading-seconds, for both YouTube and Audio.
+   Built once from the chapter text: characters before the verse ÷ characters in the book × BOOKS[i].d.
+   The highlighter only compares a clock to these times. Audio's clock is the file time minus the notice. */
+const markCache = {};
 let hlKey = "", hlMark = "", hlFresh = true, hlWantScroll = false, heard = null;
-function spansFor(i) {
+function verseMarks(i) {
   if (i < 0) return null;
   const key = (editionEn() ? "en" : "ru") + ":" + BOOKS[i].c;
   const data = readCache[key];
   const dur = BOOKS[i].d || 0;
   if (!data || !dur) return null;
-  const hit = spanCache[key];
+  const hit = markCache[key];
   if (hit && hit.data === data && hit.dur === dur) return hit;
-  const chapters = [];
-  let total = 0;
+  const raw = [];
+  let chars = 0;
   for (let c = 0; c < data.length; c++) {
     const verses = [];
-    const origin = total;
     const ch = data[c] || [];
     for (let v = 0; v < ch.length; v++) {
-      const len = String(ch[v][1] || "").length;
-      verses.push({ n: ch[v][0], at: total });
-      total += len;
+      verses.push({ n: ch[v][0], chars: chars });
+      chars += String(ch[v][1] || "").length;
     }
-    chapters.push({ origin: origin, verses: verses });
+    raw.push(verses);
   }
-  return spanCache[key] = { data: data, dur: dur, total: total, chapters: chapters };
+  const total = chars || 1;
+  const chapters = raw.map(verses => verses.map(v => ({ n: v.n, t: v.chars / total * dur })));
+  return markCache[key] = { data: data, dur: dur, chapters: chapters };
 }
-function locateVerse(i, reading) {
-  const box = spansFor(i);
-  if (!box || !box.total) return null;
+/* Chapter 1 is reading-time 0, so only that seek plays the spoken notice. */
+function chapterReading(i, n) {
+  if (i < 0 || n <= 1) return 0;
+  const marks = verseMarks(i);
+  const ch = marks && marks.chapters[n - 1];
+  return ch && ch.length ? ch[0].t : 0;
+}
+/* Reading time 0 (the notice, or the start of the book) stays on the first verse. */
+function verseAt(verses, reading) {
+  if (!verses || !verses.length) return 1;
   const t = Math.max(0, +reading || 0);
-  let ch = 0;
-  for (let c = 0; c < box.chapters.length; c++) {
-    if (box.chapters[c].origin / box.total * box.dur <= t + 1e-4) ch = c;
-    else break;
-  }
-  const verses = box.chapters[ch].verses;
-  let verse = verses.length ? verses[0].n : 1;
+  if (t <= 0) return verses[0].n;
+  let verse = verses[0].n;
   for (let v = 0; v < verses.length; v++) {
-    if (verses[v].at / box.total * box.dur <= t + 1e-4) verse = verses[v].n;
-    else break;
-  }
-  return { ch: ch + 1, verse: verse };
-}
-function verseShown(i, ch, reading) {
-  const box = spansFor(i);
-  const slot = box && box.chapters[ch - 1];
-  if (!slot || !slot.verses.length) return 1;
-  const t = Math.max(0, +reading || 0);
-  let verse = slot.verses[0].n;
-  if (!box.total) return verse;
-  for (let v = 0; v < slot.verses.length; v++) {
-    if (slot.verses[v].at / box.total * box.dur <= t + 1e-4) verse = slot.verses[v].n;
+    if (verses[v].t <= t + 1e-4) verse = verses[v].n;
     else break;
   }
   return verse;
 }
+function locateVerse(i, reading) {
+  const marks = verseMarks(i);
+  if (!marks || !marks.chapters.length) return null;
+  const t = Math.max(0, +reading || 0);
+  let ch = 0;
+  for (let c = 0; c < marks.chapters.length; c++) {
+    const start = marks.chapters[c].length ? marks.chapters[c][0].t : 0;
+    if (start <= t + 1e-4) ch = c;
+    else break;
+  }
+  return { ch: ch + 1, verse: verseAt(marks.chapters[ch], t) };
+}
+function verseShown(i, ch, reading) {
+  const marks = verseMarks(i);
+  const slot = marks && marks.chapters[ch - 1];
+  return verseAt(slot, reading);
+}
 function liveReading() {
   if (cur < 0) return null;
   if (mode === "audio") {
+    /* File clock minus the notice. Never the raw file time, and never the YouTube clock. */
     if (au.dataset.code === BOOKS[cur].c && au.src && au.readyState >= 1) return readingOf(au.currentTime || 0);
     return null;
   }
   try { if (ytReady(cur)) return ytReading(); } catch (e) {}
   return null;
 }
+function inNotice() {
+  return mode === "audio" && au.dataset.code === (cur >= 0 ? BOOKS[cur].c : "") && (au.currentTime || 0) <= lead() + 0.02;
+}
 function readingNow() {
   if (cur < 0) return 0;
   const live = liveReading();
-  if (chapterPin && chapterPin.i === cur && Date.now() - chapterPin.at < 8000) {
+  const pinFresh = chapterPin && chapterPin.i === cur && Date.now() - chapterPin.at < 8000;
+  /* Disclaimer is what is actually playing, and no chapter seek is waiting to leave it. */
+  if (inNotice() && !(pinFresh && chapterPin.t > 0.4)) {
+    heard = { i: cur, t: 0, mode: "audio" };
+    return 0;
+  }
+  if (pinFresh) {
     if (live == null || Math.abs(live - chapterPin.t) > 2) return chapterPin.t;
   }
-  if (live != null) { heard = { i: cur, t: live }; return live; }
-  if (heard && heard.i === cur) return heard.t;
+  if (live != null) { heard = { i: cur, t: live, mode: mode }; return live; }
+  if (heard && heard.i === cur && heard.mode === mode) return heard.t;
   return 0;
 }
 function alignChapter(key) {
@@ -865,7 +868,8 @@ function ytReading() {
   } catch (e) { return 0; }
 }
 setInterval(() => {
-  if (mode === "yt" && yt && yt.getPlayerState && yt.getPlayerState() === 1) save(ytReading());
+  if (mode === "audio" && cur >= 0 && au.src && !au.paused) save(readingOf(au.currentTime || 0));
+  else if (mode === "yt" && yt && yt.getPlayerState && yt.getPlayerState() === 1) save(ytReading());
   followChapter(true);
 }, 5000);
 
@@ -880,8 +884,7 @@ let chapterPin = null;
 function snapshotTime() {
   let live = null;
   if (mode === "audio") {
-    const file = au.currentTime || 0;
-    if (file > 1) live = readingOf(file);
+    if (cur >= 0 && au.dataset.code === BOOKS[cur].c && au.src && au.readyState >= 1) live = readingOf(au.currentTime || 0);
   } else {
     const t = ytReading() || 0;
     if (t > 1) live = t;
