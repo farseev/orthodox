@@ -491,15 +491,129 @@ function renderChapter(key) {
     });
   });
 }
+/* Reading time of a chapter: characters before it ÷ characters in the book × BOOKS[i].d.
+   Chapter 1 is 0, so only that seek plays the spoken notice. Later chapters seek past it. */
+function chapterReading(i, n) {
+  if (i < 0 || n <= 1) return 0;
+  const data = readCache[(editionEn() ? "en" : "ru") + ":" + BOOKS[i].c];
+  const dur = BOOKS[i].d || 0;
+  if (!data || !dur || n > data.length) return 0;
+  let before = 0, total = 0;
+  for (let c = 0; c < data.length; c++) {
+    let len = 0;
+    const ch = data[c];
+    for (let v = 0; v < ch.length; v++) len += String(ch[v][1] || "").length;
+    total += len;
+    if (c < n - 1) before += len;
+  }
+  return total ? before / total * dur : 0;
+}
+function audioReady(i) {
+  return au.dataset.code === BOOKS[i].c && !!au.src && au.readyState >= 1;
+}
+function ytReady(i) {
+  try {
+    if (!yt || !yt.seekTo || !yt.getVideoData) return false;
+    const id = (yt.getVideoData() || {}).video_id || "";
+    return !!id && clips(BOOKS[i]).some(c => c.y === id);
+  } catch (e) { return false; }
+}
+let chapterTok = 0;
+function placeAudio(i, reading, start, token) {
+  if (!audioReady(i)) return;
+  const target = reading > 0.4 ? fileOf(reading) : 0;
+  const place = () => {
+    if (token !== chapterTok || au.dataset.code !== BOOKS[i].c) return;
+    try {
+      const dur = au.duration && isFinite(au.duration) ? au.duration : target + 1;
+      au.currentTime = Math.min(target, Math.max(0, dur - 0.3));
+    } catch (e) {}
+  };
+  place();
+  if (mode === "audio") {
+    const dur = readingDur();
+    $("tCur").textContent = clock(reading);
+    if (dur && !seeking) $("seek").value = Math.round(Math.min(reading, dur) / dur * 1000);
+  }
+  if (start) {
+    if (au.paused) {
+      const p = au.play();
+      if (p && p.then) p.then(place).catch(() => {});
+    }
+  } else if (!au.paused) au.pause();
+  if (target >= 0.4) setTimeout(() => {
+    if (token !== chapterTok) return;
+    if (Math.abs((au.currentTime || 0) - target) > 2) place();
+  }, 400);
+}
+function placeYT(i, reading, start, token) {
+  if (!ytReady(i)) return;
+  const loc = clipAt(BOOKS[i], reading || 0);
+  const c = clips(BOOKS[i])[loc.i];
+  const at = (c.start || 0) + loc.local;
+  ytPart = loc.i;
+  let id = "";
+  try { id = (yt.getVideoData() || {}).video_id || ""; } catch (e) {}
+  const kick = () => {
+    if (token !== chapterTok) return;
+    try {
+      if ((yt.getVideoData() || {}).video_id === c.y && Math.abs((yt.getCurrentTime() || 0) - at) > 2) yt.seekTo(at, true);
+    } catch (e) {}
+  };
+  if (id === c.y) {
+    try { yt.seekTo(at, true); } catch (e) {}
+    if (start) { try { yt.playVideo(); } catch (e) {} }
+    else { try { const s = yt.getPlayerState && yt.getPlayerState(); if (s === 1 || s === 3) yt.pauseVideo(); } catch (e) {} }
+    setTimeout(kick, 500);
+  } else if (start) {
+    try { loadClip(c, at); yt.playVideo(); } catch (e) {}
+  } else {
+    try {
+      const spec = { videoId: c.y, startSeconds: at };
+      if (c.end) spec.endSeconds = c.end;
+      yt.cueVideoById(spec);
+    } catch (e) {}
+  }
+}
+function seekPlayingChapter() {
+  if (cur < 0) return;
+  const key = (editionEn() ? "en" : "ru") + ":" + BOOKS[cur].c;
+  if (readShown !== key || !readCache[key]) return;
+  const reading = chapterReading(cur, readPos[key] || 1);
+  const token = ++chapterTok;
+  chapterPin = { i: cur, t: reading, at: Date.now() };
+  save(reading, true);
+  const active = (mode === "audio" && HAS_AUDIO) ? "audio" : "yt";
+  const playing = active === "audio" ? (!!au.src && !au.paused) : (function () {
+    try { const s = yt && yt.getPlayerState && yt.getPlayerState(); return s === 1 || s === 3; } catch (e) { return false; }
+  })();
+  if (active === "audio" ? audioReady(cur) : ytReady(cur)) {
+    if (active === "audio") placeAudio(cur, reading, playing, token);
+    else placeYT(cur, reading, playing, token);
+  } else play(cur, reading);
+  if (active !== "audio" && audioReady(cur)) placeAudio(cur, reading, false, token);
+  if (active !== "yt" && ytReady(cur)) placeYT(cur, reading, false, token);
+  setTimeout(() => { if (token === chapterTok && cur >= 0) save(reading, true); }, 1200);
+}
 function stepChapter(d) {
   if (!readShown || !readCache[readShown]) return;
-  readPos[readShown] = (readPos[readShown] || 1) + d;
+  const data = readCache[readShown];
+  const n = (readPos[readShown] || 1) + d;
+  if (n < 1 || n > data.length) return;
+  readPos[readShown] = n;
   renderChapter(readShown);
   $("chH").scrollIntoView({ block: "start" });
+  seekPlayingChapter();
 }
 $("chPrev").onclick = () => stepChapter(-1);
 $("chNext").onclick = () => stepChapter(1);
-$("chSel").onchange = () => { if (!readShown) return; readPos[readShown] = +$("chSel").value || 1; renderChapter(readShown); $("chH").scrollIntoView({ block: "start" }); };
+$("chSel").onchange = () => {
+  if (!readShown) return;
+  readPos[readShown] = +$("chSel").value || 1;
+  renderChapter(readShown);
+  $("chH").scrollIntoView({ block: "start" });
+  seekPlayingChapter();
+};
 $("prevBtn").onclick = () => { if (cur > 0) play(cur - 1, 0); };
 $("nextBtn").onclick = () => { if (cur < BOOKS.length - 1) play(cur + 1, 0); };
 $("poster").onclick = () => { const i = cur >= 0 ? cur : savedIndex(); if (i >= 0) play(i, i === savedIndex() ? savedTime() : 0); else play(0, 0); };
@@ -633,14 +747,22 @@ const PLAY = '<path d="M7 4.5v15l13-7.5z"/>', PAUSE = '<path d="M6 4h4v16H6zM14 
 let seeking = false;
 function audioSrc(i) { return AUDIO_BASE + BOOKS[i].c + AUDIO_EXT; }
 function pauseYT() { try { if (yt && yt.pauseVideo) yt.pauseVideo(); } catch (e) {} }
+/* Set when a chapter control seeks, so a source switch during the seek
+   uses that chapter's reading time instead of the position still on screen. */
+let chapterPin = null;
 function snapshotTime() {
+  let live = null;
   if (mode === "audio") {
     const file = au.currentTime || 0;
-    if (file > 1) return readingOf(file);
+    if (file > 1) live = readingOf(file);
   } else {
     const t = ytReading() || 0;
-    if (t > 1) return t;
+    if (t > 1) live = t;
   }
+  if (chapterPin && chapterPin.i === cur && Date.now() - chapterPin.at < 3000) {
+    if (live == null || Math.abs(live - chapterPin.t) > 5) return chapterPin.t;
+  }
+  if (live != null) return live;
   if (cur >= 0 && savedIndex() === cur && savedTime() > 1) return savedTime();
   return mode === "audio" ? readingOf(au.currentTime || 0) : (ytReading() || 0);
 }
@@ -731,16 +853,21 @@ function playAudioAt(i, start) {
   const afterPlay = () => {
     if (stale()) return;
     place();
-    /* Chrome can drop the seek when play() starts — put it back once playback has begun. */
-    if (target >= 0.4 && Math.abs((au.currentTime || 0) - target) > 2) {
-      const fix = () => { if (!stale()) place(); };
+    /* Chrome can drop the seek when play() starts — put it back once playback has begun.
+       A far seek on a file that just loaded can take more than one try. */
+    if (target >= 0.4) {
+      const fix = () => { if (!stale() && Math.abs((au.currentTime || 0) - target) > 2) place(); };
       au.addEventListener("playing", fix, { once: true });
-      setTimeout(fix, 300);
+      [400, 1000, 1800].forEach(ms => setTimeout(fix, ms));
     }
     save(reading, true);
   };
   const startPlay = () => {
     if (stale()) return;
+    if (target >= 0.4 && au.readyState < 2) {
+      au.addEventListener("loadeddata", startPlay, { once: true });
+      return;
+    }
     place();
     let started = false;
     const begin = () => {
@@ -751,7 +878,7 @@ function playAudioAt(i, start) {
     };
     if (target >= 0.4 && Math.abs((au.currentTime || 0) - target) > 1.5) {
       au.addEventListener("seeked", begin, { once: true });
-      setTimeout(begin, 1200);
+      setTimeout(begin, 2500);
     } else begin();
   };
   if (au.readyState >= 1) startPlay();
