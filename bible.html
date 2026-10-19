@@ -169,8 +169,6 @@ select.speed{height:44px;border:1px solid var(--hairline);background:var(--page)
 .chh{font-family:var(--serif);font-weight:500;font-size:1.65rem;line-height:1.2;margin:16px 0 12px;scroll-margin-top:72px}
 .verses p{font-family:var(--serif);font-size:1.28rem;line-height:1.55;margin:0 0 .8em}
 .verses sup{font-family:var(--sans);font-size:.58em;font-weight:600;color:var(--gold-text);margin-inline-end:.35em;position:relative;top:-.25em}
-.verses p.hl{background:var(--lit-wash);padding:.12em .5em;margin-inline:-.5em;scroll-margin:88px}
-.verses p.hl{background:color-mix(in srgb, var(--gold) 22%, var(--lit-wash))}
 .portal{margin:18px 0 0;padding:14px 16px;border:1px solid var(--gold);background:var(--raised);font:500 .98rem/1.55 var(--sans);color:var(--ink)}
 .portal a,.credit a{color:var(--gold-text);font-weight:600}
 html.edition-en .books .tg{display:none}
@@ -318,29 +316,11 @@ let mode = "yt";          /* "yt" | "audio" — only changes when the user picks
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 function L() { return UI[langSel.value] ? langSel.value : "ru"; }
 function editionEn() { return L() === "en"; }
-/* Every hosted file opens with the spoken source notice. The reading's first word is not at a
-   fixed offset: some books sit in silence after the notice. AUDIO_START is that first word,
-   measured on each file. YouTube has no notice, so its clock stays the raw player time.
-   Highlighting stays on verse 1 until AUDIO_START, then counts reading time from there. */
-const AUDIO_START = { en: {"nt01":14.329,"nt02":7.362,"nt03":7.312,"nt04":7.365,"nt05":7.349,"nt06":7.179,"nt07":7.188,"nt08":6.688,"nt09":7.662,"nt10":7.502,"nt11":7.297,"nt12":7.016,"nt13":7.317,"nt14":7.312,"nt15":7.498,"nt16":6.733,"nt17":8.055,"nt18":7.136,"nt19":7.623,"nt20":6.986,"nt21":7.779,"nt22":7.709,"nt23":6.782,"nt24":7.123,"nt25":7.386,"nt26":6.635,"nt27":7.389,"ot01":13.627,"ot02":7.064,"ot03":7.115,"ot04":7.191,"ot05":8.140,"ot06":6.938,"ot07":7.375,"ot08":6.482,"ot09":6.643,"ot10":7.054,"ot11":7.019,"ot12":7.191,"ot13":6.935,"ot14":6.596,"ot15":7.582,"ot16":7.200,"ot17":4.827,"ot18":4.819,"ot19":4.845,"ot20":4.842,"ot21":7.114,"ot22":5.894,"ot23":6.771,"ot24":6.727,"ot25":6.283,"ot26":4.827,"ot27":4.847,"ot28":6.467,"ot29":5.878,"ot30":6.850,"ot31":4.420,"ot32":4.827,"ot33":8.004,"ot34":4.847,"ot35":6.979,"ot36":6.260,"ot37":6.997,"ot38":6.497,"ot39":6.857,"ot40":6.937,"ot41":7.073,"ot42":7.208,"ot43":6.256,"ot44":6.769,"ot45":6.185,"ot46":7.137,"ot47":4.843,"ot48":4.819,"ot49":4.826,"ot50":4.831}, ru: {"nt01":6.882,"nt02":6.960,"nt03":6.894,"nt04":7.090,"nt05":7.068,"nt06":5.373,"nt07":7.000,"nt08":6.932,"nt09":7.025,"nt10":7.069,"nt11":6.015,"nt12":6.922,"nt13":6.931,"nt14":7.031,"nt15":6.913,"nt16":7.358,"nt17":7.067,"nt18":6.935,"nt19":6.999,"nt20":7.455,"nt21":7.049,"nt22":6.802,"nt23":6.998,"nt24":5.820,"nt25":6.927,"nt26":7.023,"nt27":6.987,"ot01":7.026,"ot02":6.811,"ot03":6.971,"ot04":6.820,"ot05":6.929,"ot06":6.911,"ot07":7.076,"ot08":6.991,"ot09":6.935,"ot10":7.138,"ot11":7.053,"ot12":6.984,"ot13":7.005,"ot14":6.954,"ot15":6.760,"ot16":6.883,"ot17":6.750,"ot18":6.699,"ot19":6.802,"ot20":6.830,"ot21":6.939,"ot22":6.941,"ot23":6.925,"ot24":6.931,"ot25":6.930,"ot26":6.890,"ot27":6.737,"ot28":7.008,"ot29":6.980,"ot30":6.944,"ot31":6.824,"ot32":6.984,"ot33":6.874,"ot34":6.924,"ot35":6.963,"ot36":6.709,"ot37":6.904,"ot38":6.945,"ot39":7.087,"ot40":6.995,"ot41":6.858,"ot42":6.981,"ot43":6.784,"ot44":6.912,"ot45":7.008,"ot46":6.788,"ot47":6.830,"ot48":6.905,"ot49":6.796,"ot50":6.723} };
-function lead() {
-  const fb = editionEn() ? 4.42 : 4.852;
-  if (cur < 0) return fb;
-  const table = AUDIO_START[editionEn() ? "en" : "ru"];
-  const t = table && table[BOOKS[cur].c];
-  return (typeof t === "number") ? t : fb;
-}
+/* Spoken notice on every hosted file. YouTube has none. Resume and seek skip it once the reading has started. */
+const LEAD = { en: 4.42, ru: 4.852 };
+function lead() { return editionEn() ? LEAD.en : LEAD.ru; }
 function readingOf(fileTime) { return Math.max(0, (fileTime || 0) - lead()); }
 function fileOf(readingTime) { return Math.max(0, readingTime || 0) + lead(); }
-/* BOOKS.d still counts the silence between the notice and the first word.
-   The audio countdown uses only the time after that first word. */
-function speechDur(i) {
-  const notice = editionEn() ? 4.42 : 4.852;
-  const table = AUDIO_START[editionEn() ? "en" : "ru"];
-  const start = table && table[BOOKS[i].c];
-  const extra = Math.max(0, ((typeof start === "number") ? start : notice) - notice);
-  return Math.max(1, (BOOKS[i].d || 1) - extra);
-}
 const JESUS = "https://jesus-portal.ru/life/announcements/audiobibliya-na-portale-iisus/";
 const EN_YT = "https://www.youtube.com/playlist?list=PL84WMXfSt-b-ju0R_A4TtVEL4_Q3zIX1Y";
 const EN_DEUT = "https://www.youtube.com/channel/UCgEOYhLBqobaiYV_SAE-Plg";
@@ -463,13 +443,13 @@ function showReading() {
   const navL = CHNAV[L()] || CHNAV.en;
   $("chPrev").setAttribute("aria-label", navL[0]);
   $("chNext").setAttribute("aria-label", navL[1]);
-  if (readShown === key && readCache[key]) { alignChapter(key); renderChapter(key); return; }
+  if (readShown === key && readCache[key]) { renderChapter(key); return; }
   readShown = key;
   const token = ++readToken;
   if (!readPos[key]) readPos[key] = readPos[(lang === "en" ? "ru:" : "en:") + b.c] || 1;
   $("verses").textContent = "";
   $("chH").textContent = chapterTitle(readPos[key]);
-  const apply = data => { if (token !== readToken) return; readCache[key] = data; alignChapter(key); renderChapter(key); };
+  const apply = data => { if (token !== readToken) return; readCache[key] = data; renderChapter(key); };
   if (readCache[key]) { apply(readCache[key]); return; }
   fetch("bible-text/" + lang + "/" + b.c + ".json").then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(apply).catch(() => {
     if (token !== readToken) return;
@@ -505,146 +485,33 @@ function renderChapter(key) {
     const parts = cut > 40 ? [text.slice(0, cut + 1), text.slice(cut + 2)] : [text];
     parts.forEach((part, i) => {
       const p = document.createElement("p");
-      p.dataset.v = String(pair[0]);
       if (i === 0) { const sup = document.createElement("sup"); sup.textContent = pair[0]; p.appendChild(sup); }
       p.appendChild(document.createTextNode(part));
       verses.appendChild(p);
     });
   });
-  paintVerse(cur >= 0 ? verseShown(cur, n, readingNow()) : 1, hlWantScroll);
-  hlWantScroll = false;
 }
-/* Verse start times in reading-seconds. YouTube uses the full book duration.
-   Audio starts the same countdown at the measured first word, over the speech that follows it. */
+/* Chapter start in reading-seconds, from the text already loaded. Chapter 1 is 0, so only that seek plays the notice. */
 const markCache = {};
-let hlKey = "", hlMark = "", hlFresh = true, hlWantScroll = false, heard = null;
-function verseMarks(i) {
-  if (i < 0) return null;
-  const key = (editionEn() ? "en" : "ru") + ":" + BOOKS[i].c;
-  const data = readCache[key];
-  const dur = mode === "audio" ? speechDur(i) : (BOOKS[i].d || 0);
-  if (!data || !dur) return null;
-  const hit = markCache[key];
-  if (hit && hit.data === data && hit.dur === dur) return hit;
-  const raw = [];
-  let chars = 0;
-  for (let c = 0; c < data.length; c++) {
-    const verses = [];
-    const ch = data[c] || [];
-    for (let v = 0; v < ch.length; v++) {
-      verses.push({ n: ch[v][0], chars: chars });
-      chars += String(ch[v][1] || "").length;
-    }
-    raw.push(verses);
-  }
-  const total = chars || 1;
-  const chapters = raw.map(verses => verses.map(v => ({ n: v.n, t: v.chars / total * dur })));
-  return markCache[key] = { data: data, dur: dur, chapters: chapters };
-}
-/* Chapter 1 is reading-time 0, so only that seek plays the spoken notice. */
 function chapterReading(i, n) {
   if (i < 0 || n <= 1) return 0;
-  const marks = verseMarks(i);
-  const ch = marks && marks.chapters[n - 1];
-  return ch && ch.length ? ch[0].t : 0;
-}
-/* Reading time 0 (the notice, or the start of the book) stays on the first verse. */
-function verseAt(verses, reading) {
-  if (!verses || !verses.length) return 1;
-  const t = Math.max(0, +reading || 0);
-  if (t <= 0) return verses[0].n;
-  let verse = verses[0].n;
-  for (let v = 0; v < verses.length; v++) {
-    if (verses[v].t <= t + 1e-4) verse = verses[v].n;
-    else break;
+  const key = (editionEn() ? "en" : "ru") + ":" + BOOKS[i].c;
+  const data = readCache[key];
+  const dur = BOOKS[i].d || 0;
+  if (!data || !dur || n > data.length) return 0;
+  let hit = markCache[key];
+  if (!hit || hit.data !== data || hit.dur !== dur) {
+    const starts = [];
+    let chars = 0;
+    for (let c = 0; c < data.length; c++) {
+      starts.push(chars);
+      const ch = data[c] || [];
+      for (let v = 0; v < ch.length; v++) chars += String(ch[v][1] || "").length;
+    }
+    const total = chars || 1;
+    hit = markCache[key] = { data: data, dur: dur, starts: starts.map(c => c / total * dur) };
   }
-  return verse;
-}
-function locateVerse(i, reading) {
-  const marks = verseMarks(i);
-  if (!marks || !marks.chapters.length) return null;
-  const t = Math.max(0, +reading || 0);
-  let ch = 0;
-  for (let c = 0; c < marks.chapters.length; c++) {
-    const start = marks.chapters[c].length ? marks.chapters[c][0].t : 0;
-    if (start <= t + 1e-4) ch = c;
-    else break;
-  }
-  return { ch: ch + 1, verse: verseAt(marks.chapters[ch], t) };
-}
-function verseShown(i, ch, reading) {
-  const marks = verseMarks(i);
-  const slot = marks && marks.chapters[ch - 1];
-  return verseAt(slot, reading);
-}
-function liveReading() {
-  if (cur < 0) return null;
-  if (mode === "audio") {
-    /* File clock minus the notice. Never the raw file time, and never the YouTube clock. */
-    if (au.dataset.code === BOOKS[cur].c && au.src && au.readyState >= 1) return readingOf(au.currentTime || 0);
-    return null;
-  }
-  try { if (ytReady(cur)) return ytReading(); } catch (e) {}
-  return null;
-}
-function inNotice() {
-  return mode === "audio" && au.dataset.code === (cur >= 0 ? BOOKS[cur].c : "") && (au.currentTime || 0) <= lead() + 0.02;
-}
-function readingNow() {
-  if (cur < 0) return 0;
-  const live = liveReading();
-  const pinFresh = chapterPin && chapterPin.i === cur && Date.now() - chapterPin.at < 8000;
-  /* Disclaimer is what is actually playing, and no chapter seek is waiting to leave it. */
-  if (inNotice() && !(pinFresh && chapterPin.t > 0.4)) {
-    heard = { i: cur, t: 0, mode: "audio" };
-    return 0;
-  }
-  if (pinFresh) {
-    if (live == null || Math.abs(live - chapterPin.t) > 2) return chapterPin.t;
-  }
-  if (live != null) { heard = { i: cur, t: live, mode: mode }; return live; }
-  if (heard && heard.i === cur && heard.mode === mode) return heard.t;
-  return 0;
-}
-function alignChapter(key) {
-  if (cur < 0 || !readCache[key]) return;
-  const loc = locateVerse(cur, readingNow());
-  if (loc) readPos[key] = loc.ch;
-}
-function paintVerse(verse, scroll) {
-  const box = $("verses");
-  if (!box) return;
-  const key = readShown;
-  if (key !== hlKey) { hlKey = key; hlMark = ""; hlFresh = true; }
-  const mark = (readPos[key] || 1) + ":" + verse;
-  let el = null;
-  box.querySelectorAll("p").forEach(p => {
-    const on = p.dataset.v === String(verse);
-    p.classList.toggle("hl", on);
-    if (on && !el) el = p;
-  });
-  const changed = mark !== hlMark;
-  hlMark = mark;
-  if (hlFresh) { hlFresh = false; return; }
-  if (!scroll || !changed || !el) return;
-  const r = el.getBoundingClientRect();
-  if (r.top >= 64 && r.bottom <= window.innerHeight - 4) return;
-  el.scrollIntoView({ block: "nearest" });
-}
-function followChapter(scroll) {
-  if (cur < 0) return;
-  const key = (editionEn() ? "en" : "ru") + ":" + BOOKS[cur].c;
-  if (readShown !== key || !readCache[key]) return;
-  const loc = locateVerse(cur, readingNow());
-  if (!loc) return;
-  if ((readPos[key] || 1) !== loc.ch) {
-    readPos[key] = loc.ch;
-    hlWantScroll = !!scroll;
-    renderChapter(key);
-    return;
-  }
-  if ((loc.ch + ":" + loc.verse) === hlMark && $("verses").querySelector("p.hl")) return;
-  paintVerse(loc.verse, !!scroll);
+  return hit.starts[n - 1] || 0;
 }
 function audioReady(i) {
   return au.dataset.code === BOOKS[i].c && !!au.src && au.readyState >= 1;
@@ -831,7 +698,7 @@ function onYTState(e) {
     try { if (e.target && e.target.pauseVideo) e.target.pauseVideo(); } catch (err) {}
     return;
   }
-  if (e.data === YT.PlayerState.PLAYING) { $("ytErr").hidden = true; save(ytReading(), true); followChapter(false); }
+  if (e.data === YT.PlayerState.PLAYING) { $("ytErr").hidden = true; save(ytReading(), true); }
   else if (e.data === YT.PlayerState.ENDED) {
     if (cur < 0) return;
     const cs = clips(BOOKS[cur]);
@@ -884,7 +751,6 @@ function ytReading() {
 setInterval(() => {
   if (mode === "audio" && cur >= 0 && au.src && !au.paused) save(readingOf(au.currentTime || 0));
   else if (mode === "yt" && yt && yt.getPlayerState && yt.getPlayerState() === 1) save(ytReading());
-  followChapter(true);
 }, 5000);
 
 /* ---- Hosted audio: explicit "Audio" source. Stays playing when the screen locks or another app opens. ---- */
@@ -946,7 +812,6 @@ function chooseSource(next) {
       catch (e) { playYT(cur, t); }
     }
     markSources();
-    followChapter(false);
     return;
   }
   const t = snapshotTime();
@@ -966,7 +831,6 @@ function chooseSource(next) {
     setAudioUI(false);
     playYT(cur, t);
   }
-  followChapter(false);
 }
 function setMediaSession(i) {
   if (!("mediaSession" in navigator) || i < 0) return;
@@ -1044,7 +908,6 @@ function skip(d) {
   chapterPin = { i: cur, t: reading, at: Date.now() };
   au.currentTime = fileOf(reading);
   save(reading, true);
-  followChapter(true);
 }
 /* Leaving the page must not switch source or restart. Only remember the Audio position. */
 document.addEventListener("visibilitychange", () => {
@@ -1069,12 +932,10 @@ if (HAS_AUDIO) {
   au.addEventListener("play", () => {
     $("ppIcon").innerHTML = PAUSE;
     if (navigator.mediaSession) navigator.mediaSession.playbackState = "playing";
-    followChapter(false);
   });
   au.addEventListener("pause", () => {
     $("ppIcon").innerHTML = PLAY;
     if (navigator.mediaSession) navigator.mediaSession.playbackState = "paused";
-    followChapter(false);
   });
   au.addEventListener("timeupdate", () => {
     if (mode !== "audio") return;
@@ -1084,7 +945,6 @@ if (HAS_AUDIO) {
     $("tCur").textContent = clock(r);
     $("tDur").textContent = clock(dur);
     if (!seeking) $("seek").value = dur ? Math.round(Math.min(r, dur) / dur * 1000) : 0;
-    if (!seeking) followChapter(true);
     if (navigator.mediaSession && navigator.mediaSession.setPositionState && au.duration) {
       try { navigator.mediaSession.setPositionState({ duration: au.duration, playbackRate: au.playbackRate, position: au.currentTime }); } catch (e) {}
     }
@@ -1101,7 +961,6 @@ if (HAS_AUDIO) {
       const reading = sk.value / 1000 * dur;
       chapterPin = { i: cur, t: reading, at: Date.now() };
       au.currentTime = fileOf(reading);
-      followChapter(true);
     }
     seeking = false;
   });
