@@ -379,13 +379,48 @@ function showTab(which) {
 }
 $("tabNT").onclick = () => showTab("nt"); $("tabOT").onclick = () => showTab("ot");
 
-/* ---- saved position ---- */
-function saved() { try { return JSON.parse(store("bible_pos") || "null"); } catch (e) { return null; } }
+/* ---- saved position ----
+   localStorage plus a small cookie (book code and reading seconds). A new window of the
+   same browser resumes from whichever of those is present. localStorage wins when it has a value. */
+function readCookiePos() {
+  try {
+    const parts = ("; " + document.cookie).split("; bible_pos=");
+    if (parts.length < 2) return null;
+    const raw = decodeURIComponent(parts.pop().split(";").shift() || "");
+    const i = raw.lastIndexOf(":");
+    if (i <= 0) return null;
+    const c = raw.slice(0, i), t = parseInt(raw.slice(i + 1), 10);
+    if (!c || !isFinite(t) || t < 0) return null;
+    return { c: c, t: t };
+  } catch (e) { return null; }
+}
+function writePos(code, t) {
+  const t0 = Math.max(0, Math.floor(+t || 0));
+  store("bible_pos", JSON.stringify({ c: code, t: t0 }));
+  try {
+    document.cookie = "bible_pos=" + encodeURIComponent(code + ":" + t0) + "; path=/; max-age=31536000; SameSite=Lax";
+  } catch (e) {}
+}
+function saved() {
+  try {
+    const raw = store("bible_pos");
+    if (raw) {
+      const o = JSON.parse(raw);
+      if (o && o.c) return { c: o.c, t: Math.max(0, +o.t || 0) };
+    }
+  } catch (e) {}
+  return readCookiePos();
+}
 function savedIndex() { const s = saved(); return s ? BOOKS.findIndex(b => b.c === s.c) : -1; }
 function savedTime() { const s = saved(); return s ? (s.t || 0) : 0; }
 let lastSave = 0;
-function save(t, force) { if (cur < 0) return; const now = Date.now(); if (!force && now - lastSave < 2000) return; lastSave = now;
-  store("bible_pos", JSON.stringify({ c: BOOKS[cur].c, t: Math.max(0, Math.floor(t || 0)) })); }
+function save(t, force) {
+  if (cur < 0) return;
+  const now = Date.now();
+  if (!force && now - lastSave < 2000) return;
+  lastSave = now;
+  writePos(BOOKS[cur].c, t);
+}
 function renderResume() {
   const r = $("resume"), i = savedIndex(), t = savedTime();
   if (i < 0 || (cur === i) || t < 30) { r.classList.remove("show"); return; }
@@ -523,82 +558,247 @@ function ytReady(i) {
     return !!id && clips(BOOKS[i]).some(c => c.y === id);
   } catch (e) { return false; }
 }
-let chapterTok = 0;
-function placeAudio(i, reading, start, token) {
-  if (!audioReady(i)) return;
-  const target = reading > 0.4 ? fileOf(reading) : 0;
-  const place = () => {
-    if (token !== chapterTok || au.dataset.code !== BOOKS[i].c) return;
-    try {
-      const dur = au.duration && isFinite(au.duration) ? au.duration : target + 1;
-      au.currentTime = Math.min(target, Math.max(0, dur - 0.3));
-    } catch (e) {}
-  };
-  place();
+/* Latest chapter click / play wins. Stale play() and seek callbacks check opGen and do nothing.
+   One currentTime write per request — no retry loop. A loop that keeps assigning currentTime
+   snaps the file back to 0 and was reverted before. */
+let opGen = 0;
+function nextOp() { return ++opGen; }
+let holdPlay = false;
+let chapterPin = null;
+let auJob = null;
+let ytJob = null;
+let ytLoadId = "";
+let ytCreating = false;
+let ytArm = 0;
+let auArm = 0;
+function liveReading() {
+  if (cur < 0) return null;
   if (mode === "audio") {
-    const dur = readingDur();
-    $("tCur").textContent = clock(reading);
-    if (dur && !seeking) $("seek").value = Math.round(Math.min(reading, dur) / dur * 1000);
+    if (au.dataset.code === BOOKS[cur].c && au.src && au.readyState >= 1) return readingOf(au.currentTime || 0);
+    return null;
   }
-  if (start) {
-    if (au.paused) {
-      const p = au.play();
-      if (p && p.then) p.then(place).catch(() => {});
+  try {
+    if (yt && yt.getCurrentTime && yt.getPlayerState) {
+      const s = yt.getPlayerState();
+      if (s === 1 || s === 2 || s === 3) return ytReading();
     }
-  } else if (!au.paused) au.pause();
-  if (target >= 0.4) setTimeout(() => {
-    if (token !== chapterTok) return;
-    if (Math.abs((au.currentTime || 0) - target) > 2) place();
-  }, 400);
+  } catch (e) {}
+  return null;
 }
-function placeYT(i, reading, start, token) {
-  if (!ytReady(i)) return;
-  const loc = clipAt(BOOKS[i], reading || 0);
-  const c = clips(BOOKS[i])[loc.i];
-  const at = (c.start || 0) + loc.local;
-  ytPart = loc.i;
-  let id = "";
-  try { id = (yt.getVideoData() || {}).video_id || ""; } catch (e) {}
-  const kick = () => {
-    if (token !== chapterTok) return;
-    try {
-      if ((yt.getVideoData() || {}).video_id === c.y && Math.abs((yt.getCurrentTime() || 0) - at) > 2) yt.seekTo(at, true);
-    } catch (e) {}
-  };
-  if (id === c.y) {
-    try { yt.seekTo(at, true); } catch (e) {}
-    if (start) { try { yt.playVideo(); } catch (e) {} }
-    else { try { const s = yt.getPlayerState && yt.getPlayerState(); if (s === 1 || s === 3) yt.pauseVideo(); } catch (e) {} }
-    setTimeout(kick, 500);
-  } else if (start) {
-    try { loadClip(c, at); yt.playVideo(); } catch (e) {}
-  } else {
-    try {
-      const spec = { videoId: c.y, startSeconds: at };
-      if (c.end) spec.endSeconds = c.end;
-      yt.cueVideoById(spec);
-    } catch (e) {}
+function rememberedReading() {
+  if (cur < 0) return 0;
+  const live = liveReading();
+  if (chapterPin && chapterPin.i === cur && Date.now() - chapterPin.at < 20000) {
+    if (live == null || Math.abs(live - chapterPin.t) > 4) return chapterPin.t;
+    chapterPin = null;
   }
+  return live == null ? 0 : live;
+}
+function applyAudio(job) {
+  if (!job || job.gen !== opGen || mode !== "audio" || cur !== job.i) return;
+  const src = audioSrc(job.i), code = BOOKS[job.i].c;
+  if (!au.src || au.dataset.code !== code || au.dataset.src !== src) {
+    au.dataset.code = code;
+    au.dataset.src = src;
+    au.preload = "auto";
+    au.src = src;
+    try { au.load(); } catch (e) {}
+    if (!job.metaHook) {
+      job.metaHook = true;
+      const gen = job.gen;
+      au.addEventListener("loadedmetadata", () => { if (gen === opGen) applyAudio(auJob); }, { once: true });
+    }
+    return;
+  }
+  if (au.readyState < 1) {
+    if (!job.metaHook) {
+      job.metaHook = true;
+      const gen = job.gen;
+      au.addEventListener("loadedmetadata", () => { if (gen === opGen) applyAudio(auJob); }, { once: true });
+    }
+    return;
+  }
+  au.playbackRate = +$("speed").value || 1;
+  setMediaSession(job.i);
+  const target = job.reading > 0.4 ? fileOf(job.reading) : 0;
+  const dur = (au.duration && isFinite(au.duration)) ? au.duration : 0;
+  if (target >= 0.4 && !(dur > 1)) {
+    /* Duration not known yet. Do not play from 0 — that would speak the notice on a later chapter. */
+    if (!job.durHook) {
+      job.durHook = true;
+      const gen = job.gen;
+      au.addEventListener("durationchange", () => { if (gen === opGen) applyAudio(auJob); }, { once: true });
+    }
+    return;
+  } else if (!job.sought) {
+    job.sought = true;
+    const to = dur ? Math.min(target, Math.max(0, dur - 0.3)) : 0;
+    if (Math.abs((au.currentTime || 0) - to) > 0.8) {
+      try { au.currentTime = to; } catch (e) {}
+      /* One correction if this seek is dropped. Not a retry loop — a second write only, and never to 0. */
+      if (to >= 0.4 && !job.fixHook) {
+        job.fixHook = true;
+        const gen = job.gen;
+        const fix = () => {
+          const j = auJob;
+          if (!j || j.gen !== gen || j.fixed) return;
+          const dur2 = (au.duration && isFinite(au.duration)) ? au.duration : 0;
+          if (!(dur2 > 1)) return;
+          const to2 = Math.min(to, Math.max(0, dur2 - 0.3));
+          if (to2 < 0.4 || Math.abs((au.currentTime || 0) - to2) <= 2) return;
+          j.fixed = true;
+          try { au.currentTime = to2; } catch (e) {}
+        };
+        au.addEventListener("seeked", fix, { once: true });
+        au.addEventListener("playing", fix, { once: true });
+        setTimeout(fix, 450);
+      }
+    }
+  }
+  save(job.reading, true);
+  if (!job.play) {
+    if (!au.paused) { try { au.pause(); } catch (e) {} }
+    return;
+  }
+  const gen = job.gen;
+  const resume = () => {
+    if (gen !== opGen || mode !== "audio" || !holdPlay || !au.paused) return;
+    if ((job.playTries || 0) >= 2) return;
+    job.playTries = (job.playTries || 0) + 1;
+    let p;
+    try { p = au.play(); } catch (e) { return; }
+    if (p && p.then) p.then(() => {
+      if (gen !== opGen) return;
+      if (!holdPlay) { try { au.pause(); } catch (e) {} }
+    }).catch(err => {
+      if (gen !== opGen) return;
+      /* Interrupted by a newer seek or by this seek. Not a hard stop — retry once, do not seek again. */
+      if (err && err.name === "AbortError" && (job.playTries || 0) < 2) resume();
+    });
+  };
+  if (!job.pauseHook) {
+    job.pauseHook = true;
+    const onPause = () => {
+      au.removeEventListener("pause", onPause);
+      if (gen !== opGen || !holdPlay) return;
+      resume();
+    };
+    au.addEventListener("pause", onPause);
+  }
+  resume();
+}
+function applyYT(job) {
+  if (!job || job.gen !== opGen || mode !== "yt" || cur !== job.i || !yt || !yt.seekTo) return;
+  const loc = clipAt(BOOKS[job.i], job.reading || 0);
+  const c = clips(BOOKS[job.i])[loc.i];
+  if (!c || !c.y) { $("ytErr").hidden = false; return; }
+  ytPart = loc.i;
+  const at = (c.start || 0) + loc.local;
+  let id = "", state = -1, now = 0;
+  try { id = (yt.getVideoData() || {}).video_id || ""; } catch (e) {}
+  try { state = yt.getPlayerState(); } catch (e) { state = -1; }
+  try { now = yt.getCurrentTime() || 0; } catch (e) {}
+  if (id !== c.y) {
+    /* Unstarted or still buffering this clip: a loadVideoById here is ignored. Wait for state. */
+    if (ytLoadId === c.y && (!id || state === -1 || state === 3)) return;
+    ytLoadId = c.y;
+    job.fixes = 0;
+    job.done = false;
+    try {
+      if (job.play) loadClip(c, at);
+      else {
+        const spec = { videoId: c.y, startSeconds: at };
+        if (c.end) spec.endSeconds = c.end;
+        yt.cueVideoById(spec);
+      }
+    } catch (e) {}
+    return;
+  }
+  if (state === -1 || state === 3) return;
+  if (Math.abs(now - at) > 1.5 && (job.fixes || 0) < 1) {
+    job.fixes = 1;
+    try { yt.seekTo(at, true); } catch (e) {}
+    return;
+  }
+  job.done = true;
+  if (job.play) { if (state !== 1) { try { yt.playVideo(); } catch (e) {} } }
+  else if (state === 1) { try { yt.pauseVideo(); } catch (e) {} }
+}
+function armAudio(job) {
+  auJob = job;
+  if (job.play && au.paused) {
+    const gen = job.gen;
+    let p;
+    try { p = au.play(); } catch (e) { p = null; }
+    if (p && p.catch) p.catch(err => {
+      if (gen !== opGen) return;
+      if (err && err.name === "AbortError") {
+        let p2;
+        try { p2 = au.play(); } catch (e) { return; }
+        if (p2 && p2.catch) p2.catch(() => {});
+      }
+    });
+  }
+  if (auArm) clearTimeout(auArm);
+  const gen = job.gen;
+  auArm = setTimeout(() => {
+    auArm = 0;
+    if (gen !== opGen || !auJob || auJob.gen !== opGen || mode !== "audio") return;
+    auJob.sought = false;
+    applyAudio(auJob);
+  }, 50);
+}
+function armYT(job) {
+  ytJob = job;
+  if (job.play && yt && yt.playVideo) { try { yt.playVideo(); } catch (e) {} }
+  if (ytArm) clearTimeout(ytArm);
+  const gen = job.gen;
+  ytArm = setTimeout(() => {
+    ytArm = 0;
+    if (gen !== opGen || !ytJob || ytJob.gen !== opGen || mode !== "yt") return;
+    if (!yt && !ytCreating) playYT(ytJob.i, ytJob.reading, ytJob.gen);
+    else applyYT(ytJob);
+  }, 50);
 }
 function seekPlayingChapter() {
   if (cur < 0) return;
   const key = (editionEn() ? "en" : "ru") + ":" + BOOKS[cur].c;
   if (readShown !== key || !readCache[key]) return;
   const reading = chapterReading(cur, readPos[key] || 1);
-  const token = ++chapterTok;
+  const token = nextOp();
   chapterPin = { i: cur, t: reading, at: Date.now() };
   save(reading, true);
+  if (mode === "audio") {
+    const dur = readingDur();
+    $("tCur").textContent = clock(reading);
+    if (dur && !seeking) $("seek").value = Math.round(Math.min(reading, dur) / dur * 1000);
+  }
   const active = (mode === "audio" && HAS_AUDIO) ? "audio" : "yt";
-  const playing = active === "audio" ? (!!au.src && !au.paused) : (function () {
-    try { const s = yt && yt.getPlayerState && yt.getPlayerState(); return s === 1 || s === 3; } catch (e) { return false; }
-  })();
-  if (active === "audio" ? audioReady(cur) : ytReady(cur)) {
-    if (active === "audio") placeAudio(cur, reading, playing, token);
-    else placeYT(cur, reading, playing, token);
-  } else play(cur, reading);
-  if (active !== "audio" && audioReady(cur)) placeAudio(cur, reading, false, token);
-  if (active !== "yt" && ytReady(cur)) placeYT(cur, reading, false, token);
-  setTimeout(() => { if (token === chapterTok && cur >= 0) save(reading, true); }, 1200);
+  if (active === "audio") {
+    armAudio({ gen: token, i: cur, reading: reading, play: holdPlay, sought: false, playTries: 0 });
+    if (yt && ytReady(cur)) {
+      try {
+        const loc = clipAt(BOOKS[cur], reading);
+        const c = clips(BOOKS[cur])[loc.i];
+        const at = (c.start || 0) + loc.local;
+        let id = "";
+        try { id = (yt.getVideoData() || {}).video_id || ""; } catch (e) {}
+        if (id === c.y) yt.seekTo(at, true);
+      } catch (e) {}
+    }
+  } else {
+    ytJob = { gen: token, i: cur, reading: reading, play: holdPlay, fixes: 0, done: false };
+    if (!yt && !ytCreating) playYT(cur, reading, token);
+    else armYT(ytJob);
+    if (au.dataset.code === BOOKS[cur].c && au.src && au.readyState >= 1) {
+      const target = reading > 0.4 ? fileOf(reading) : 0;
+      const dur = (au.duration && isFinite(au.duration)) ? au.duration : 0;
+      if (target < 0.4 || dur > 1) {
+        const to = dur ? Math.min(target, Math.max(0, dur - 0.3)) : 0;
+        try { if (Math.abs((au.currentTime || 0) - to) > 0.8) au.currentTime = to; } catch (e) {}
+      }
+    }
+  }
 }
 function stepChapter(d) {
   if (!readShown || !readCache[readShown]) return;
@@ -628,21 +828,25 @@ $("poster").onclick = () => { const i = cur >= 0 ? cur : savedIndex(); if (i >= 
 
 function play(i, start) {
   cur = i;
-  chapterPin = { i: i, t: Math.max(0, +start || 0), at: Date.now() };
+  const reading = Math.max(0, +start || 0);
+  const token = nextOp();
+  chapterPin = { i: i, t: reading, at: Date.now() };
+  holdPlay = true;
   renderNow(); showTab(i < 27 ? "nt" : "ot");
   try { history.replaceState(null, "", "#" + BOOKS[i].c); } catch (e) {}
-  save(start || 0, true);
+  save(reading, true);
   if (mode === "audio" && HAS_AUDIO) {
     pauseYT();
     setAudioUI(true);
     $("poster").style.display = "none";
     $("ytErr").hidden = true;
-    playAudioAt(i, start || 0);
+    auJob = { gen: token, i: i, reading: reading, play: true, sought: false, playTries: 0 };
+    applyAudio(auJob);
   } else {
     mode = "yt";
     try { au.pause(); } catch (e) {}
     setAudioUI(false);
-    playYT(i, start || 0);
+    playYT(i, reading, token);
   }
   markSources();
 }
@@ -689,6 +893,7 @@ function clipAt(b, t) {
 }
 let ytPart = 0;
 function loadClip(c, at) {
+  ytLoadId = c.y;
   const spec = { videoId: c.y, startSeconds: at };
   if (c.end) spec.endSeconds = c.end;
   yt.loadVideoById(spec);
@@ -698,42 +903,58 @@ function onYTState(e) {
     try { if (e.target && e.target.pauseVideo) e.target.pauseVideo(); } catch (err) {}
     return;
   }
-  if (e.data === YT.PlayerState.PLAYING) { $("ytErr").hidden = true; save(ytReading(), true); }
-  else if (e.data === YT.PlayerState.ENDED) {
+  const st = e.data;
+  if ((st === 1 || st === 2 || st === 5) && ytJob && ytJob.gen === opGen && !ytJob.done) applyYT(ytJob);
+  if (st === YT.PlayerState.PLAYING) {
+    holdPlay = true;
+    $("ytErr").hidden = true;
+    save(rememberedReading(), true);
+  } else if (st === YT.PlayerState.PAUSED) {
+    if (!ytJob || ytJob.done || ytJob.gen !== opGen) holdPlay = false;
+    save(rememberedReading(), true);
+  } else if (st === YT.PlayerState.ENDED) {
     if (cur < 0) return;
+    if (ytJob && ytJob.gen === opGen && !ytJob.done) return;
     const cs = clips(BOOKS[cur]);
     if (ytPart < cs.length - 1) {
       ytPart += 1;
       try { const c = cs[ytPart]; loadClip(c, c.start || 0); } catch (err) { $("ytErr").hidden = false; }
       return;
     }
-    if (cur < BOOKS.length - 1) { store("bible_pos", JSON.stringify({ c: BOOKS[cur + 1].c, t: 0 })); play(cur + 1, 0); }
+    if (cur < BOOKS.length - 1) { writePos(BOOKS[cur + 1].c, 0); play(cur + 1, 0); }
   }
 }
-function playYT(i, start) {
+function playYT(i, start, token) {
   $("poster").style.display = "none"; $("ytErr").hidden = true;
   $("screen").classList.remove("audio");
+  const gen = token || nextOp();
+  const reading = Math.max(0, +start || 0);
+  ytJob = { gen: gen, i: i, reading: reading, play: true, fixes: 0, done: false };
   loadYT(() => {
+    if (gen !== opGen || cur !== i || mode !== "yt") return;
+    const job = ytJob;
+    if (!job || job.gen !== opGen) return;
     const b = BOOKS[i];
-    const loc = clipAt(b, start || 0);
+    const loc = clipAt(b, job.reading || 0);
     const c = clips(b)[loc.i];
     ytPart = loc.i;
     const at = (c.start || 0) + loc.local;
     if (!c.y) { $("ytErr").hidden = false; return; }
     try {
       if (!yt) {
-        const pv = { autoplay: 1, start: Math.floor(at), rel: 0, playsinline: 1, modestbranding: 1, hl: L(), origin: location.origin };
+        if (ytCreating) return;
+        ytCreating = true;
+        ytLoadId = c.y;
+        const pv = { autoplay: job.play ? 1 : 0, start: Math.floor(at), rel: 0, playsinline: 1, modestbranding: 1, hl: L(), origin: location.origin };
         if (c.end) pv.end = Math.ceil(c.end);
         yt = new YT.Player("ytBox", { host: "https://www.youtube-nocookie.com", videoId: c.y,
           playerVars: pv,
-          events: { onReady: e => { try { e.target.playVideo(); } catch (err) {} },
+          events: { onReady: () => { ytCreating = false; if (ytJob && ytJob.gen === opGen) applyYT(ytJob); },
                     onError: () => { $("ytErr").hidden = false; },
                     onStateChange: onYTState } });
-      } else {
-        loadClip(c, at);
-        try { yt.playVideo(); } catch (err) {}
-      }
+      } else applyYT(job);
     } catch (err) {
+      ytCreating = false;
       $("ytErr").hidden = false;
     }
   });
@@ -749,8 +970,9 @@ function ytReading() {
   } catch (e) { return 0; }
 }
 setInterval(() => {
-  if (mode === "audio" && cur >= 0 && au.src && !au.paused) save(readingOf(au.currentTime || 0));
-  else if (mode === "yt" && yt && yt.getPlayerState && yt.getPlayerState() === 1) save(ytReading());
+  if (cur < 0) return;
+  if (mode === "audio" && au.src && !au.paused) save(rememberedReading());
+  else if (mode === "yt" && yt && yt.getPlayerState && yt.getPlayerState() === 1) save(rememberedReading());
 }, 5000);
 
 /* ---- Hosted audio: explicit "Audio" source. Stays playing when the screen locks or another app opens. ---- */
@@ -758,23 +980,12 @@ const PLAY = '<path d="M7 4.5v15l13-7.5z"/>', PAUSE = '<path d="M6 4h4v16H6zM14 
 let seeking = false;
 function audioSrc(i) { return AUDIO_BASE + BOOKS[i].c + AUDIO_EXT; }
 function pauseYT() { try { if (yt && yt.pauseVideo) yt.pauseVideo(); } catch (e) {} }
-/* Set when a chapter control seeks, so a source switch during the seek
-   uses that chapter's reading time instead of the position still on screen. */
-let chapterPin = null;
 function snapshotTime() {
-  let live = null;
-  if (mode === "audio") {
-    if (cur >= 0 && au.dataset.code === BOOKS[cur].c && au.src && au.readyState >= 1) live = readingOf(au.currentTime || 0);
-  } else {
-    const t = ytReading() || 0;
-    if (t > 1) live = t;
-  }
-  if (chapterPin && chapterPin.i === cur && Date.now() - chapterPin.at < 3000) {
-    if (live == null || Math.abs(live - chapterPin.t) > 5) return chapterPin.t;
-  }
+  if (chapterPin && chapterPin.i === cur && Date.now() - chapterPin.at < 20000) return rememberedReading();
+  const live = liveReading();
   if (live != null) return live;
   if (cur >= 0 && savedIndex() === cur && savedTime() > 1) return savedTime();
-  return mode === "audio" ? readingOf(au.currentTime || 0) : (ytReading() || 0);
+  return 0;
 }
 function markSources() {
   const auOn = mode === "audio";
@@ -799,37 +1010,39 @@ function chooseSource(next) {
     return;
   }
   if (next === mode) {
+    const t = rememberedReading();
+    holdPlay = true;
+    const token = nextOp();
+    chapterPin = { i: cur, t: t, at: Date.now() };
     if (next === "audio") {
-      const src = audioSrc(cur);
-      const resumeAt = au.dataset.src === src ? readingOf(au.currentTime || 0) : savedTime();
-      chapterPin = { i: cur, t: resumeAt, at: Date.now() };
-      if (!au.src || au.dataset.src !== src) playAudioAt(cur, resumeAt);
-      else if (au.paused) { playAudioAt(cur, resumeAt); }
+      auJob = { gen: token, i: cur, reading: t, play: true, sought: false, playTries: 0 };
+      applyAudio(auJob);
     } else {
-      const t = snapshotTime();
-      chapterPin = { i: cur, t: t, at: Date.now() };
-      try { if (yt && yt.playVideo) yt.playVideo(); else playYT(cur, t); }
-      catch (e) { playYT(cur, t); }
+      try { if (yt && yt.playVideo) yt.playVideo(); else playYT(cur, t, token); }
+      catch (e) { playYT(cur, t, token); }
     }
     markSources();
     return;
   }
   const t = snapshotTime();
+  const token = nextOp();
   chapterPin = { i: cur, t: t, at: Date.now() };
   save(t, true);
   mode = next;
   store("bible_src", mode);
   markSources();
+  holdPlay = true;
   if (next === "audio") {
     pauseYT();
     setAudioUI(true);
     $("poster").style.display = "none";
     $("ytErr").hidden = true;
-    playAudioAt(cur, t);
+    auJob = { gen: token, i: cur, reading: t, play: true, sought: false, playTries: 0 };
+    applyAudio(auJob);
   } else {
     try { au.pause(); } catch (e) {}
     setAudioUI(false);
-    playYT(cur, t);
+    playYT(cur, t, token);
   }
 }
 function setMediaSession(i) {
@@ -842,80 +1055,27 @@ function setMediaSession(i) {
   });
 }
 function playAudioAt(i, start) {
-  const reading = Math.max(0, +start || 0);
-  const target = reading > 0.4 ? fileOf(reading) : 0;
-  const code = BOOKS[i].c;
-  const src = audioSrc(i);
-  const token = (au._tok = (au._tok || 0) + 1);
-  if (au.dataset.code !== code || au.dataset.src !== src) {
-    au.dataset.code = code;
-    au.dataset.src = src;
-    au.preload = "auto";
-    au.src = src;
-    try { au.load(); } catch (e) {}
-  }
-  au.playbackRate = +$("speed").value || 1;
-  setMediaSession(i);
-  const stale = () => au._tok !== token || mode !== "audio" || cur !== i;
-  const place = () => {
-    if (target < 0.4 || Math.abs((au.currentTime || 0) - target) <= 1.5) return;
-    try {
-      const dur = au.duration && isFinite(au.duration) ? au.duration : target + 1;
-      au.currentTime = Math.min(target, Math.max(0, dur - 0.3));
-    } catch (e) {}
-  };
-  const afterPlay = () => {
-    if (stale()) return;
-    place();
-    /* Chrome can drop the seek when play() starts — put it back once playback has begun.
-       A far seek on a file that just loaded can take more than one try. */
-    if (target >= 0.4) {
-      const fix = () => { if (!stale() && Math.abs((au.currentTime || 0) - target) > 2) place(); };
-      au.addEventListener("playing", fix, { once: true });
-      [400, 1000, 1800].forEach(ms => setTimeout(fix, ms));
-    }
-    save(reading, true);
-  };
-  const startPlay = () => {
-    if (stale()) return;
-    if (target >= 0.4 && au.readyState < 2) {
-      au.addEventListener("loadeddata", startPlay, { once: true });
-      return;
-    }
-    place();
-    let started = false;
-    const begin = () => {
-      if (started || stale()) return;
-      started = true;
-      const p = au.play();
-      if (p && p.then) p.then(afterPlay).catch(() => {}); else afterPlay();
-    };
-    if (target >= 0.4 && Math.abs((au.currentTime || 0) - target) > 1.5) {
-      au.addEventListener("seeked", begin, { once: true });
-      setTimeout(begin, 2500);
-    } else begin();
-  };
-  if (au.readyState >= 1) startPlay();
-  else au.addEventListener("loadedmetadata", startPlay, { once: true });
+  const token = nextOp();
+  holdPlay = true;
+  auJob = { gen: token, i: i, reading: Math.max(0, +start || 0), play: true, sought: false, playTries: 0 };
+  applyAudio(auJob);
 }
 function readingDur() {
   if (au.duration && isFinite(au.duration)) return Math.max(1, au.duration - lead());
   return cur >= 0 ? (BOOKS[cur].d || 0) : 0;
 }
 function skip(d) {
-  if (!au.duration) return;
+  if (cur < 0 || mode !== "audio" || !au.duration) return;
   const reading = Math.min(Math.max(0, readingOf(au.currentTime) + d), Math.max(0, readingDur() - 0.3));
+  const token = nextOp();
   chapterPin = { i: cur, t: reading, at: Date.now() };
-  au.currentTime = fileOf(reading);
-  save(reading, true);
+  auJob = { gen: token, i: cur, reading: reading, play: holdPlay, sought: false, playTries: 0 };
+  applyAudio(auJob);
 }
-/* Leaving the page must not switch source or restart. Only remember the Audio position. */
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden && mode === "audio" && cur >= 0) save(readingOf(au.currentTime || 0), true);
-});
-window.addEventListener("pagehide", () => {
-  if (mode === "audio" && cur >= 0) save(readingOf(au.currentTime || 0), true);
-});
+function persistPlace() { if (cur >= 0) save(rememberedReading(), true); }
+/* Leaving the page must not switch source or restart. Remember whichever source is active. */
+document.addEventListener("visibilitychange", () => { if (document.hidden) persistPlace(); });
+window.addEventListener("pagehide", persistPlace);
 
 if (HAS_AUDIO) {
   $("srcAu").onclick = () => chooseSource("audio");
@@ -923,28 +1083,42 @@ if (HAS_AUDIO) {
   $("ppBtn").onclick = () => {
     if (cur < 0) return $("poster").onclick();
     if (mode !== "audio") return chooseSource("audio");
-    if (au.paused) au.play().catch(() => {}); else { save(readingOf(au.currentTime || 0), true); au.pause(); }
+    if (au.paused) {
+      holdPlay = true;
+      const token = nextOp();
+      const t = rememberedReading();
+      chapterPin = { i: cur, t: t, at: Date.now() };
+      auJob = { gen: token, i: cur, reading: t, play: true, sought: false, playTries: 0 };
+      applyAudio(auJob);
+    } else {
+      holdPlay = false;
+      save(rememberedReading(), true);
+      au.pause();
+    }
   };
   $("backBtn").onclick = () => skip(-15);
   $("fwdBtn").onclick = () => skip(30);
   $("speed").onchange = () => { au.playbackRate = +$("speed").value; store("bible_rate", $("speed").value); };
   const r = store("bible_rate"); if (r) $("speed").value = r;
   au.addEventListener("play", () => {
+    holdPlay = true;
     $("ppIcon").innerHTML = PAUSE;
     if (navigator.mediaSession) navigator.mediaSession.playbackState = "playing";
   });
   au.addEventListener("pause", () => {
+    if (holdPlay) return;
     $("ppIcon").innerHTML = PLAY;
     if (navigator.mediaSession) navigator.mediaSession.playbackState = "paused";
+    save(rememberedReading(), true);
   });
   au.addEventListener("timeupdate", () => {
     if (mode !== "audio") return;
-    const r = readingOf(au.currentTime);
+    const shown = readingOf(au.currentTime);
     const dur = readingDur();
-    save(r);
-    $("tCur").textContent = clock(r);
+    save(rememberedReading());
+    $("tCur").textContent = clock(shown);
     $("tDur").textContent = clock(dur);
-    if (!seeking) $("seek").value = dur ? Math.round(Math.min(r, dur) / dur * 1000) : 0;
+    if (!seeking) $("seek").value = dur ? Math.round(Math.min(shown, dur) / dur * 1000) : 0;
     if (navigator.mediaSession && navigator.mediaSession.setPositionState && au.duration) {
       try { navigator.mediaSession.setPositionState({ duration: au.duration, playbackRate: au.playbackRate, position: au.currentTime }); } catch (e) {}
     }
@@ -957,22 +1131,40 @@ if (HAS_AUDIO) {
   sk.addEventListener("input", () => { seeking = true; const dur = readingDur(); if (dur) $("tCur").textContent = clock(sk.value / 1000 * dur); });
   sk.addEventListener("change", () => {
     const dur = readingDur();
-    if (dur) {
+    if (dur && cur >= 0) {
       const reading = sk.value / 1000 * dur;
+      const token = nextOp();
       chapterPin = { i: cur, t: reading, at: Date.now() };
-      au.currentTime = fileOf(reading);
+      auJob = { gen: token, i: cur, reading: reading, play: holdPlay, sought: false, playTries: 0 };
+      applyAudio(auJob);
     }
     seeking = false;
   });
   if ("mediaSession" in navigator) {
     const ms = navigator.mediaSession, set = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) {} };
-    set("play", () => { if (mode === "audio") au.play(); else chooseSource("audio"); });
-    set("pause", () => { save(readingOf(au.currentTime || 0), true); au.pause(); });
+    set("play", () => {
+      if (mode !== "audio") return chooseSource("audio");
+      holdPlay = true;
+      const token = nextOp();
+      const t = rememberedReading();
+      auJob = { gen: token, i: cur, reading: t, play: true, sought: false, playTries: 0 };
+      applyAudio(auJob);
+    });
+    set("pause", () => { holdPlay = false; save(rememberedReading(), true); au.pause(); });
     set("previoustrack", () => $("prevBtn").onclick());
     set("nexttrack", () => $("nextBtn").onclick());
     set("seekbackward", d => skip(-((d && d.seekOffset) || 15)));
     set("seekforward", d => skip((d && d.seekOffset) || 30));
-    set("seekto", d => { if (d && d.seekTime != null) au.currentTime = d.seekTime; });
+    set("seekto", d => {
+      if (!d || d.seekTime == null || cur < 0 || mode !== "audio") return;
+      const reading = readingOf(d.seekTime);
+      const token = nextOp();
+      chapterPin = { i: cur, t: reading, at: Date.now() };
+      auJob = { gen: token, i: cur, reading: reading, play: holdPlay, sought: true, playTries: 0 };
+      try { au.currentTime = d.seekTime; } catch (e) {}
+      save(reading, true);
+      applyAudio(auJob);
+    });
   }
 }
 
@@ -1027,8 +1219,11 @@ langSel.addEventListener("change", () => {
     if (deepCh >= 1) readPos[key] = deepCh;
     play(hi, deepT);
     try { history.replaceState(null, "", "#" + raw); } catch (e) {}
-  } else if (hi >= 0) { cur = hi; renderNow(); showTab(hi < 27 ? "nt" : "ot"); $("posterTxt").textContent = BOOKS[hi].n; $("posterTxt").lang = editionEn() ? "en" : "ru"; }
-  else { const i = savedIndex(); if (i >= 0) showTab(i < 27 ? "nt" : "ot"); }
+  } else {
+    const i = savedIndex();
+    if (i >= 0) play(i, savedTime());
+    else if (hi >= 0) { cur = hi; renderNow(); showTab(hi < 27 ? "nt" : "ot"); $("posterTxt").textContent = BOOKS[hi].n; $("posterTxt").lang = editionEn() ? "en" : "ru"; }
+  }
 })();
 </script>
 <script id="langparam">(function(){
