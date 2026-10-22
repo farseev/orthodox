@@ -165,7 +165,20 @@ select.speed{height:44px;border:1px solid var(--hairline);background:var(--page)
 .readk{margin:0;font-family:var(--serif);font-size:1.45rem;font-weight:500;line-height:1.25}
 .chnav{display:flex;align-items:center;gap:8px;margin-top:12px}
 .chnav[hidden]{display:none}
-.chnav select{flex:1;min-width:0;height:44px;border:1px solid var(--hairline);background:var(--page);color:var(--ink);font:500 1.05rem/1 var(--serif);padding:0 8px;border-radius:0}
+.chnav select,.chnav .chpick{flex:1;min-width:9rem;height:44px;border:1px solid var(--hairline);background:var(--page);color:var(--ink);font:500 16px/1.2 var(--serif);padding:0 8px;border-radius:0;touch-action:manipulation}
+.chnav .chpick{display:none;align-items:center;justify-content:space-between;text-align:start;padding:0 32px 0 12px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237A5C28' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center}
+html[dir=rtl] .chnav .chpick{padding:0 12px 0 32px;background-position:left 12px center}
+.chlist{display:none;margin-top:10px;max-height:46vh;overflow:auto;-webkit-overflow-scrolling:touch;gap:6px;grid-template-columns:repeat(auto-fill,minmax(48px,1fr))}
+.chopt{height:44px;border:1px solid var(--hairline);background:var(--page);color:var(--ink);font:600 16px/1 var(--sans);cursor:pointer;padding:0}
+.chopt[aria-current="true"]{background:var(--deep);color:var(--gold);border-color:var(--gold)}
+/* A mid-page select on a phone never opens while the document smooth-scrolls. Phones get an in-page list instead. */
+@media (max-width:700px), (hover:none) and (pointer:coarse){
+  .chnav select{display:none}
+  .chnav .chpick{display:inline-flex}
+  .chlist.open{display:grid}
+}
 .chh{font-family:var(--serif);font-weight:500;font-size:1.65rem;line-height:1.2;margin:16px 0 12px;scroll-margin-top:72px}
 .verses p{font-family:var(--serif);font-size:1.28rem;line-height:1.55;margin:0 0 .8em}
 .verses sup{font-family:var(--sans);font-size:.58em;font-weight:600;color:var(--gold-text);margin-inline-end:.35em;position:relative;top:-.25em}
@@ -185,6 +198,7 @@ footer a{color:var(--gold-text)}
   .ctrl .lbl-t{display:none}
 }
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+@media (max-width:700px), (hover:none) and (pointer:coarse){html{scroll-behavior:auto}}
 
 /* six nav items: tighter spacing and a two-line parish name so "Support the parish" stays visible */
 @media(min-width:701px){.top .nav a{padding-left:8px;padding-right:8px;font-size:.84rem}.top .brand .ru{white-space:normal;max-width:9.6em;line-height:1.12}.top .brand .en{display:none}}
@@ -266,8 +280,10 @@ footer a{color:var(--gold-text)}
       <div class="chnav" id="chNav">
         <button class="cbtn" id="chPrev" type="button">‹</button>
         <select id="chSel"></select>
+        <button class="cbtn chpick" id="chPick" type="button" aria-expanded="false" aria-controls="chList"></button>
         <button class="cbtn" id="chNext" type="button">›</button>
       </div>
+      <div class="chlist" id="chList"></div>
       <h2 class="chh" id="chH"></h2>
       <div class="verses" id="verses"></div>
     </section>
@@ -509,6 +525,28 @@ function renderChapter(key) {
   }
   sel.value = String(n);
   sel.setAttribute("aria-label", chapterTitle(n));
+  const pick = $("chPick"), list = $("chList");
+  pick.textContent = chapterTitle(n);
+  pick.setAttribute("aria-label", chapterTitle(n));
+  if (list.dataset.key !== key) {
+    list.dataset.key = key;
+    list.replaceChildren();
+    list.classList.remove("open");
+    pick.setAttribute("aria-expanded", "false");
+    for (let i = 1; i <= data.length; i++) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chopt";
+      b.dataset.n = String(i);
+      b.textContent = String(i);
+      b.setAttribute("aria-label", chapterTitle(i));
+      list.appendChild(b);
+    }
+  }
+  list.querySelectorAll("button").forEach(b => {
+    if (b.dataset.n === String(n)) b.setAttribute("aria-current", "true");
+    else b.removeAttribute("aria-current");
+  });
   $("chPrev").disabled = n <= 1;
   $("chNext").disabled = n >= data.length;
   const verses = $("verses");
@@ -800,27 +838,39 @@ function seekPlayingChapter() {
     }
   }
 }
-function stepChapter(d) {
+function goChapter(n) {
   if (!readShown || !readCache[readShown]) return;
   const data = readCache[readShown];
-  const n = (readPos[readShown] || 1) + d;
+  n = +n || 1;
   if (n < 1 || n > data.length) return;
   chapterPin = { i: cur, t: chapterReading(cur, n), at: Date.now() };
   readPos[readShown] = n;
   renderChapter(readShown);
-  $("chH").scrollIntoView({ block: "start" });
   seekPlayingChapter();
+  const head = $("chH");
+  setTimeout(() => { try { head.scrollIntoView({ block: "nearest", behavior: "auto" }); } catch (e) {} }, 50);
+}
+function stepChapter(d) {
+  if (!readShown) return;
+  goChapter((readPos[readShown] || 1) + d);
 }
 $("chPrev").onclick = () => stepChapter(-1);
 $("chNext").onclick = () => stepChapter(1);
-$("chSel").onchange = () => {
-  if (!readShown) return;
-  const n = +$("chSel").value || 1;
-  chapterPin = { i: cur, t: chapterReading(cur, n), at: Date.now() };
-  readPos[readShown] = n;
-  renderChapter(readShown);
-  $("chH").scrollIntoView({ block: "start" });
-  seekPlayingChapter();
+$("chSel").onchange = () => { if (readShown) goChapter(+$("chSel").value || 1); };
+$("chPick").onclick = () => {
+  const list = $("chList"), open = !list.classList.contains("open");
+  list.classList.toggle("open", open);
+  $("chPick").setAttribute("aria-expanded", open ? "true" : "false");
+  if (!open) return;
+  const on = list.querySelector('[aria-current="true"]');
+  if (on) list.scrollTop = Math.max(0, on.offsetTop - list.clientHeight / 2);
+};
+$("chList").onclick = e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  $("chList").classList.remove("open");
+  $("chPick").setAttribute("aria-expanded", "false");
+  goChapter(+b.dataset.n || 1);
 };
 $("prevBtn").onclick = () => { if (cur > 0) play(cur - 1, 0); };
 $("nextBtn").onclick = () => { if (cur < BOOKS.length - 1) play(cur + 1, 0); };
