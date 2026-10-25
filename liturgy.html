@@ -85,7 +85,8 @@ body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 
 /* ---------- top bar ---------- */
-.top{position:sticky;top:0;z-index:40;background:rgba(27,25,23,.97);color:#EFE9DF;
+.top{position:sticky;top:0;z-index:40;width:100%;max-width:100%;box-sizing:border-box;
+  background:rgba(27,25,23,.97);color:#EFE9DF;
   backdrop-filter:saturate(140%) blur(6px);border-bottom:1px solid #322d28}
 .top .row{display:flex;align-items:center;gap:12px;max-width:1080px;margin:0 auto;padding:9px 16px}
 .top a.back{display:inline-flex;align-items:center;gap:7px;color:#EFE9DF;text-decoration:none;font:500 .86rem/1 var(--sans);white-space:nowrap}
@@ -103,17 +104,25 @@ body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);
   background-repeat:no-repeat;background-position:right 9px center}
 
 /* ---------- search bar ---------- */
-.searchbar{display:none;position:absolute;left:0;right:0;top:100%;z-index:45;background:#232019;border-bottom:1px solid #322d28;box-shadow:0 16px 34px rgba(0,0,0,.4)}
+/* In-flow (not absolute) so the dark chrome is the same width as the sticky
+   header. Absolute left/right:0 shrink-wraps on mobile/WebKit when the sticky
+   parent has no explicit width, which left a gap beside the bar and drifted
+   under pinch-zoom / iOS input-focus zoom. */
+.searchbar{display:none;position:relative;width:100%;max-width:100%;box-sizing:border-box;
+  z-index:45;background:#232019;border-bottom:1px solid #322d28;box-shadow:0 16px 34px rgba(0,0,0,.4)}
 .searchbar.open{display:block}
-.searchbar .row{display:flex;align-items:center;gap:8px;max-width:1080px;margin:0 auto;padding:9px 16px}
-.searchbar input{flex:1;background:#191611;border:1px solid #3d372f;border-radius:3px;color:#EFE9DF;
-  font:400 .98rem/1.3 var(--sans);padding:11px 12px}
+.searchbar .row{display:flex;align-items:center;flex-wrap:nowrap;gap:8px;width:100%;max-width:1080px;
+  margin:0 auto;padding:9px 16px;min-width:0;box-sizing:border-box}
+.searchbar input{flex:1 1 auto;min-width:0;width:100%;background:#191611;border:1px solid #3d372f;border-radius:3px;color:#EFE9DF;
+  font:400 1rem/1.3 var(--sans);padding:11px 12px}
 .searchbar input::placeholder{color:#8b8378}
 .searchbar input:focus{outline:none;border-color:var(--gold)}
-.searchbar .cnt{font:500 .78rem/1 var(--sans);color:#b9b1a4;white-space:nowrap}
-.searchbar .navb{background:#191611;border:1px solid #3d372f;color:#EFE9DF;border-radius:3px;width:34px;height:34px;cursor:pointer;font-size:1rem}
+.searchbar .cnt{font:500 .78rem/1 var(--sans);color:#b9b1a4;white-space:nowrap;flex:0 0 auto}
+.searchbar .cnt:empty{display:none}
+.searchbar .navb{flex:0 0 auto;background:#191611;border:1px solid #3d372f;color:#EFE9DF;border-radius:3px;width:34px;height:34px;cursor:pointer;font-size:1rem}
 .searchbar .navb:hover{border-color:var(--gold)}
-.searchbar .navb.go{width:auto;padding:0 14px;font:600 .84rem/1 var(--sans);color:var(--gold);letter-spacing:.02em}
+.searchbar .navb.go{width:auto;max-width:30vw;padding:0 14px;font:600 .84rem/1 var(--sans);color:var(--gold);letter-spacing:.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .searchbar input::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
 
 /* ---------- day strip ---------- */
@@ -157,6 +166,7 @@ body.dayfilter.is-sun .rub-dayprok{display:none}
 main{padding:8px 0 90px}
 .lead{max-width:74ch;margin:24px auto 8px;padding:0 20px;color:var(--ink-2);font:400 1rem/1.65 var(--sans)}
 .sec{max-width:1080px;margin:0 auto;padding:26px 20px 4px;scroll-margin-top:66px}
+body.search-open .sec{scroll-margin-top:122px}
 .sec-h{font-family:var(--serif);font-size:1.5rem;font-weight:600;color:var(--ink);line-height:1.2;
   padding-bottom:4px;border-bottom:2px solid var(--gold);margin-bottom:4px;display:inline-block}
 .sec-h .cs{display:block;font-size:.98rem;font-weight:500;color:var(--gold-text);font-family:var(--cyr)}
@@ -217,12 +227,19 @@ footer a{color:var(--gold-text)}
   .day .row{padding:12px 14px;gap:10px 16px}
   .top .ttl{display:none}
   .day .dt{font-size:.86rem;flex-basis:100%}
+  .searchbar .row{padding:8px 12px;gap:6px}
+  .searchbar input{font-size:16px;padding:9px 10px}
+  .searchbar .navb{width:32px;height:32px}
+  .searchbar .navb.go{padding:0 10px;font-size:.78rem}
 }
 @media (max-width:380px){
   .ln{gap:0 9px}
   .cs-t{font-size:.96rem} .tr-t{font-size:.94rem}
   .top .row{padding:9px 12px;gap:9px}
   .langpick{max-width:38vw}
+  .searchbar .row{padding:8px 10px;gap:5px}
+  .searchbar .navb{width:30px;height:30px}
+  .searchbar .navb.go{padding:0 8px}
 }
 html[lang="zh"]{--serif:'Noto Serif SC',serif} html[lang="ta"]{--serif:'Noto Serif Tamil',serif}
 html[lang="th"]{--serif:'Noto Serif Thai',serif} html[lang="ko"]{--serif:'Noto Serif KR',serif}
@@ -248,7 +265,7 @@ html[lang="ar"]{--serif:'Noto Naskh Arabic',serif; --sans:'Noto Sans Arabic',san
 }
 
 /* ---- unified site header (brand + nav + tools in ONE bar) ---- */
-.top{position:sticky;top:0;z-index:40;background:rgba(247,243,236,.97);color:var(--ink);
+.top{position:sticky;top:0;z-index:40;width:100%;max-width:100%;box-sizing:border-box;background:rgba(247,243,236,.97);color:var(--ink);
 -webkit-backdrop-filter:saturate(140%) blur(8px);backdrop-filter:saturate(140%) blur(8px);
 border-bottom:1px solid var(--hairline)}
 .top .row{display:flex;align-items:center;gap:12px;max-width:1080px;margin:0 auto;padding:6px 16px}
@@ -627,6 +644,7 @@ document.getElementById("qclear").addEventListener("click",()=>{ qEl.value=""; c
 document.getElementById("searchBtn").addEventListener("click",()=>{
   const w=document.getElementById("searchWrap"); const open=!w.classList.contains("open");
   w.classList.toggle("open");
+  document.body.classList.toggle("search-open", open);
   document.getElementById("searchBtn").setAttribute("aria-pressed", open);
   if(open){ qEl.focus(); } else { qEl.value=""; clearHighlights(); }
 });
