@@ -750,7 +750,8 @@ if(a&&a.scrollIntoView){try{a.scrollIntoView({inline:'center',block:'nearest'});
     var base=body, qs="", qi=body.indexOf("?");
     if(qi>=0){ base=body.slice(0,qi); qs=body.slice(qi+1); }
     var sp=new URLSearchParams(qs);
-    if(lang==="en" && !force) sp.delete("lang"); else sp.set("lang", lang);
+    if(/bible\.html$/.test(base)){ sp.set("lang", lang==="ru"?"ru":"en"); }
+    else if(lang==="en" && !force) sp.delete("lang"); else sp.set("lang", lang);
     var s=sp.toString();
     return base+(s?"?"+s:"")+hash;
   }

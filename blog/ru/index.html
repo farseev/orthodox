@@ -194,7 +194,7 @@ footer nav a:hover{border-color:var(--gold);color:var(--gold)}
 <b>Русская Православная Церковь</b></div>
 <nav><a href="../../index.html?lang=ru">Главная</a><a href="../../calendar.html?lang=ru">Церковный календарь</a>
 <a href="../../fasting.html?lang=ru">Пост</a><a href="../../liturgy.html?lang=ru">Литургия</a>
-<a href="index.html?lang=ru">Чтение</a><a href="../../index.html?lang=ru#donate">Поддержать приход</a></nav>
+<a href="index.html?lang=ru">Чтение</a><a href="../../bible.html?lang=ru">Аудиобиблия</a><a href="../../index.html?lang=ru#donate">Поддержать приход</a></nav>
 <p class="d">Неофициальный сайт прихода. Точные даты, адрес и время богослужений уточняйте в группе прихода в WhatsApp или у духовенства. Эти статьи предлагаются для чтения и размышления; с пастырскими вопросами обращайтесь к священнику.</p></div></footer><script>(function(){var a=document.querySelector('.top .nav a[aria-current="page"]');
 if(a&&a.scrollIntoView){try{a.scrollIntoView({inline:'center',block:'nearest'});}catch(e){}}})();</script>
 <script id="langparam">(function(){
@@ -225,7 +225,8 @@ if(a&&a.scrollIntoView){try{a.scrollIntoView({inline:'center',block:'nearest'});
     var base=body, qs="", qi=body.indexOf("?");
     if(qi>=0){ base=body.slice(0,qi); qs=body.slice(qi+1); }
     var sp=new URLSearchParams(qs);
-    if(lang==="en" && !force) sp.delete("lang"); else sp.set("lang", lang);
+    if(/bible\.html$/.test(base)){ sp.set("lang", lang==="ru"?"ru":"en"); }
+    else if(lang==="en" && !force) sp.delete("lang"); else sp.set("lang", lang);
     var s=sp.toString();
     return base+(s?"?"+s:"")+hash;
   }
