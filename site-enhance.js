@@ -1,6 +1,6 @@
 /* orthodox.sg — small enhancements, loaded on a few pages.
    1) GA4 events for the actions that matter (donate, WhatsApp, schedule, language).
-      Mark donate_click, donate_interact, whatsapp_click and schedule_view as "key events" in GA4 (Admin > Events).
+      Mark donate_click, donate_tier_select, whatsapp_click and schedule_view as "key events" in GA4 (Admin > Events).
    2) A dismissible "read in your language" bar for visitors whose browser language is not English.
    Nothing here sets cookies. The dismissal is kept for the browser session only. */
 (function () {
@@ -14,6 +14,12 @@
     var h = a.getAttribute('href') || '';
     if (/#donate/.test(h) || a.classList.contains('navgive')) {
       ev('donate_click', { link_location: a.classList.contains('navgive') ? 'menu' : 'page' }); return;
+    }
+    if (a.classList.contains('tier')) {
+      ev('donate_tier_select', { amount: a.getAttribute('data-amt') || 'other', purpose: a.getAttribute('data-ref') || 'other' }); return;
+    }
+    if (a.id === 'qrSave') {
+      ev('donate_qr_save', { amount: String(a.getAttribute('download') || '').replace(/\D+/g, '') }); return;
     }
     if (a.closest('#donate')) {
       ev('donate_interact', { element: String(a.id || a.className || a.tagName).slice(0, 40) }); return;
