@@ -199,12 +199,12 @@ footer nav a:hover{border-color:var(--gold);color:var(--gold)}
 <p class="d">Site não oficial da paróquia. Confirme as datas exatas, o endereço e os horários dos ofícios no grupo de WhatsApp da paróquia ou junto do clero. Estes artigos são oferecidos para leitura e reflexão; para questões pastorais, fale com um sacerdote.</p></div></footer><script>(function(){var a=document.querySelector('.top .nav a[aria-current="page"]');
 if(a&&a.scrollIntoView){try{a.scrollIntoView({inline:'center',block:'nearest'});}catch(e){}}})();</script>
 <script id="langparam">(function(){
-  var LANGS={en:1,ru:1,zh:1,ms:1,ta:1,id:1,vi:1,th:1,ko:1,ja:1,tl:1,es:1,pt:1,fr:1,de:1,el:1,ar:1,ro:1};
+  var LANGS={en:1,ru:1,zh:1,ms:1,ta:1,id:1,vi:1,th:1,ko:1,ja:1,tl:1,es:1,pt:1,fr:1,de:1,el:1,ar:1,ro:1,"zh-hant":1,"hi":1};
   function ok(l){return !!LANGS[l];}
   var params; try{params=new URLSearchParams(location.search);}catch(e){params=new URLSearchParams();}
   var q=params.get("lang");
   var path=location.pathname;
-  var bm=path.match(/\/blog\/([a-z]{2})(?:\/|$)/);
+  var bm=path.match(/\/blog\/([a-z]{2}(?:-[a-z]{4})?)(?:\/|$)/);
   var fileLang=(bm&&ok(bm[1]))?bm[1]:"en";
   var isBlog=/\/blog(?:\/|$)/.test(path);
   var isBible=/\/bible\.html$/.test(path);
