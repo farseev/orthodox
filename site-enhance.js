@@ -1,6 +1,11 @@
 /* orthodox.sg — small enhancements, loaded on a few pages.
    1) GA4 events for the actions that matter (donate, WhatsApp, schedule, language).
-      Mark donate_click, donate_tier_select, whatsapp_click and schedule_view as "key events" in GA4 (Admin > Events).
+      Donation funnel: donate_view (the #donate section is seen) > donate_click (a "Give" link) >
+      donate_tier_select (an amount) > donate_qr_save (the PayNow QR is saved). PayNow is paid in the
+      donor's banking app, so donate_qr_save is the last step the site can see.
+      Mark donate_tier_select, donate_qr_save, whatsapp_click (type=contact) and contact_click as
+      "key events" in GA4 (Admin > Events).
+      Loaded on every page, including all blog articles in every language.
    2) A dismissible "read in your language" bar for visitors whose browser language is not English.
    Nothing here sets cookies. The dismissal is kept for the browser session only. */
 (function () {
@@ -24,7 +29,11 @@
     if (a.closest('#donate')) {
       ev('donate_interact', { element: String(a.id || a.className || a.tagName).slice(0, 40) }); return;
     }
-    if (/wa\.me|whatsapp\.com/.test(h)) { ev('whatsapp_click'); return; }
+    if (/wa\.me|whatsapp\.com/.test(h)) {
+      ev('whatsapp_click', { type: /chat\.whatsapp\.com/.test(h) ? 'group' : 'contact', page_type: /\/blog\//.test(location.pathname) ? 'article' : 'page' }); return;
+    }
+    if (/^mailto:|^tel:/.test(h)) { ev('contact_click', { method: h.slice(0, h.indexOf(':')) }); return; }
+    if (/t\.me\//.test(h)) { ev('telegram_join', { destination: h.replace(/^https?:\/\//, '') }); return; }
     if (/facebook\.com|instagram\.com|t\.me\/|youtube/.test(h)) {
       ev('social_click', { destination: h.replace(/^https?:\/\//, '').split('/')[0] }); return;
     }
@@ -37,6 +46,13 @@
   }
 
   whenReady(function () {
+    var d = document.getElementById('donate');
+    if (d && 'IntersectionObserver' in window) {
+      var od = new IntersectionObserver(function (es) {
+        es.forEach(function (x) { if (x.isIntersecting) { ev('donate_view', { arrived_by: /#donate/.test(location.hash) ? 'link' : 'scroll' }); od.disconnect(); } });
+      }, { threshold: 0.3 });
+      od.observe(d);
+    }
     var s = document.getElementById('schedule');
     if (s && 'IntersectionObserver' in window) {
       var o = new IntersectionObserver(function (es) {
