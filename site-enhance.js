@@ -67,7 +67,8 @@
     try { if (sessionStorage.getItem('langBarOff')) return; } catch (e) {}
     if (/[?&]lang=/.test(location.search)) return;
     var pref = (navigator.languages && navigator.languages[0]) || navigator.language || '';
-    var code = pref.toLowerCase().split('-')[0];
+    var low = pref.toLowerCase();
+    var code = /^zh-(tw|hk|mo|hant)/.test(low) ? 'zh-hant' : low.split('-')[0];
     if (code === 'fil') code = 'tl';
     if (code === 'nb' || code === 'nn') return;
     var MSG = {
@@ -76,13 +77,19 @@
       vi: ['Đọc bằng tiếng Việt?', 'Tiếng Việt'], th: ['อ่านเป็นภาษาไทย?', 'ไทย'], ko: ['한국어로 읽기?', '한국어'],
       ja: ['日本語で読む？', '日本語'], tl: ['Basahin sa Filipino?', 'Filipino'], es: ['¿Leer en español?', 'Español'],
       pt: ['Ler em português?', 'Português'], fr: ['Lire en français ?', 'Français'], de: ['Auf Deutsch lesen?', 'Deutsch'],
-      el: ['Διαβάστε στα ελληνικά;', 'Ελληνικά'], ar: ['القراءة بالعربية؟', 'العربية'], ro: ['Citiți în română?', 'Română']
+      el: ['Διαβάστε στα ελληνικά;', 'Ελληνικά'], ar: ['القراءة بالعربية؟', 'العربية'], ro: ['Citiți în română?', 'Română'],
+      'zh-hant': ['閱讀繁體中文版？', '繁體中文'], hi: ['हिन्दी में पढ़ें?', 'हिन्दी']
     };
     if (!MSG[code]) return;
 
     var go = null;
     var sel = document.getElementById('lang');
     var pick = document.querySelector('select.langpick');
+    if (code === 'zh-hant') {                              /* no Traditional Chinese version yet: offer Simplified */
+      var box = sel || pick, found = false;
+      if (box) for (var k = 0; k < box.options.length; k++) if (box.options[k].value === 'zh-hant') found = true;
+      if (!found) code = 'zh';
+    }
     if (sel && sel.value === 'en') {                       /* app-style pages: home, calendar, fasting, liturgy */
       var has = false; for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === code) has = true;
       if (!has) return;
