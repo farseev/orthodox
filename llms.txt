@@ -57,6 +57,7 @@ The site is published in 18 languages: English, Russian, Chinese, Malay, Tamil,
 Indonesian, Vietnamese, Thai, Korean, Japanese, Filipino, Spanish, Portuguese, French, German,
 Greek, Arabic and Romanian. Each article has a URL per language; English is at /blog/<slug>.html
 and other languages at /blog/<lang>/<slug>.html, cross-linked with hreflang.
+Articles are also published in Traditional Chinese (/blog/zh-hant/).
 
 ## Editorial stance of the articles — important for accurate citation
 These articles set out Orthodox Christian teaching on its own terms, for readers from any
