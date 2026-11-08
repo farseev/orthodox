@@ -19,6 +19,25 @@ Melayu, தமிழ், Bahasa Indonesia, Tiếng Việt, ไทย, 한국어,
 is remembered in the browser. Every part of the site is translated — the interface, the
 live schedule (weekday names *and* service names), and all three prayer texts.
 
+## Adding languages: `tools/i18n.py` (November 2026)
+
+The 18 existing language versions are hand-made and stay as they are. Further languages — Traditional Chinese
+(`zh-hant`) and Hindi (`hi`), listed in `GENERATED` in `tools/i18n.py` — are rendered from the English pages:
+
+- `python3 tools/i18n.py extract` splits the English Readings (`blog/*.html`) and the in-page dictionaries of
+  `index.html`, `calendar.html`, `fasting.html`, `liturgy.html` and `bible.html` (`tools/i18n_app.py`) into
+  segments: `i18n/source.json` (English) and `i18n/pages.json` (segments per page).
+- `python3 tools/i18n.py todo hi > hi.todo.tsv` lists what is untranslated (`id<TAB>English`); translations come
+  back as `id<TAB>text` and go in with `python3 tools/i18n.py merge hi hi.out.tsv` (placeholders `<g1>…</g1>`,
+  `<x1/>`, `{d}`, `{n}` are checked). `i18n/<code>.json` is the translation memory.
+- `python3 tools/i18n.py build` publishes every article that is 100% translated as `blog/<code>/<slug>.html`
+  (the language's index once all articles are done), adds it to the hreflang cluster and language menu of every
+  other version, to `sitemap.xml` and `llms.txt`; when all app-page segments are done it adds the language to the
+  app pages' dictionaries and menus and to the `?lang=` handler of every page. Running it again changes nothing.
+- `python3 tools/i18n.py status` shows coverage; `python3 tools/check_site.py` must report 0 errors before a commit.
+- When you change an English article, rebuild: the changed sentences show up in `todo` and the page is taken
+  down in the generated languages until they are translated again.
+
 ## Update of 16 October 2026
 
 - **Donations — October 2026 sheet (dated 3 October 2026).** September balance S$263.37 +
